@@ -1,0 +1,869 @@
+<% layout ("layout/boilerplate") %>
+
+<!-- Leaflet CSS & JS for Interactive Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root {
+    --brand-green: #198754;
+    --brand-dark-green: #146c43;
+    --brand-light-green: #e8f5e9;
+    --surface-card: #ffffff;
+    --border-soft: #e5e7eb;
+    --text-muted-custom: #6b7280;
+  }
+
+  body {
+    background-color: #f7f9f7;
+  }
+
+  .show-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 0 3.5rem;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb-custom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted-custom);
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .breadcrumb-custom a {
+    color: var(--brand-green);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .breadcrumb-custom a:hover {
+    text-decoration: underline;
+  }
+
+  /* Main Title Section */
+  .place-header {
+    margin-bottom: 1.5rem;
+  }
+  .place-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .place-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: var(--text-muted-custom);
+    font-size: 1rem;
+  }
+
+  /* Badges */
+  .badge-category {
+    background: #e8f5e9;
+    color: #1b5e20;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #c8e6c9;
+  }
+  .badge-district {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-rating {
+    background: #fef3c7;
+    color: #b45309;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Image Gallery */
+  .gallery-main {
+    border-radius: 20px;
+    overflow: hidden;
+    height: 420px;
+    background: #e5e7eb;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    position: relative;
+  }
+  .gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .gallery-main:hover img {
+    transform: scale(1.03);
+  }
+  .thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .thumb-item {
+    height: 95px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 2px solid transparent;
+    transition: all 0.25s ease;
+  }
+  .thumb-item.active, .thumb-item:hover {
+    border-color: var(--brand-green);
+    transform: translateY(-2px);
+  }
+  .thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Cards & Sections */
+  .detail-card {
+    background: var(--surface-card);
+    border-radius: 18px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1.5rem;
+  }
+  .card-title-custom {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title-custom i {
+    color: var(--brand-green);
+  }
+
+  /* Key Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-box {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 14px;
+    padding: 12px 14px;
+    text-align: left;
+    transition: transform 0.2s ease;
+  }
+  .stat-box:hover {
+    background: #f1f8f3;
+    transform: translateY(-2px);
+  }
+  .stat-box .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-box .value {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  /* Action Buttons Box */
+  .action-box {
+    background: linear-gradient(135deg, #198754, #146c43);
+    border-radius: 20px;
+    padding: 1.5rem;
+    color: white;
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.25);
+    margin-bottom: 1.5rem;
+  }
+  .action-box h4 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+  }
+  .action-box p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 1.2rem;
+  }
+  .btn-add-planner {
+    background: white;
+    color: #198754;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 11px 20px;
+    border: none;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+  }
+  .btn-add-planner:hover {
+    background: #f0fdf4;
+    color: #146c43;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-plan-ai {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 10px 20px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    transition: all 0.25s ease;
+  }
+  .btn-plan-ai:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+  }
+
+  /* Author & Curator Profile */
+  .author-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+  }
+  .author-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #15803d);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+  }
+  .author-info h6 {
+    margin: 0;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+  .author-role {
+    font-size: 0.8rem;
+    color: #059669;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .author-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* Map Container */
+  #placeMap {
+    height: 380px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-soft);
+    z-index: 1;
+  }
+  .map-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-map-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-directions {
+    background: #198754;
+    color: white !important;
+  }
+  .btn-directions:hover {
+    background: #146c43;
+  }
+  .btn-copy-coords {
+    background: #f1f5f9;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1;
+  }
+  .btn-copy-coords:hover {
+    background: #e2e8f0;
+  }
+
+  /* Activity Tags */
+  .activity-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 4px 4px 4px 0;
+  }
+
+  /* Nearby Destinations */
+  .nearby-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  }
+  .nearby-chip:hover {
+    background: #f8fafc;
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+    transform: translateY(-2px);
+  }
+
+  /* GeoFence Alert */
+  .safety-banner {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .safety-icon {
+    font-size: 2rem;
+    color: #059669;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-main {
+      height: 280px;
+    }
+    .place-title {
+      font-size: 1.8rem;
+    }
+    .thumb-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+
+<div class="container show-container">
+
+  <!-- =========================================================
+       HEADER & TITLE SECTION
+  ========================================================== -->
+  <div class="place-header">
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      <span class="badge-category">
+        <i class="fa-solid fa-tag"></i>
+        <%= place.category || 'Sightseeing' %>
+      </span>
+
+      <span class="badge-district">
+        <i class="fa-solid fa-location-dot"></i>
+        <%= place.district %>, Maharashtra
+      </span>
+
+      <% if (place.rating) { %>
+        <span class="badge-rating">
+          <i class="fa-solid fa-star"></i>
+          <%= place.rating %> / 5.0
+        </span>
+      <% } %>
+
+      <% if (place.geoFence && place.geoFence.enabled) { %>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill" style="font-size: 0.8rem; font-weight: 600;">
+          <i class="fa-solid fa-shield-halved me-1"></i> Verified Tourist Safe Zone
+        </span>
+      <% } %>
+    </div>
+
+    <h1 class="place-title"><%= place.name %></h1>
+
+    <div class="place-subtitle">
+      <span>
+        <i class="fa-solid fa-map-pin text-danger me-1"></i>
+        <%= place.location && place.location.address ? place.location.address : (place.district + ', Maharashtra, India') %>
+      </span>
+      <span>•</span>
+      <span>
+        <i class="fa-solid fa-clock text-success me-1"></i>
+        Visiting: <%= place.openingTime || 'Open 24 Hours' %> – <%= place.closingTime || 'Sunset' %>
+      </span>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       MAIN GRID: GALLERY & HIGHLIGHTS
+  ========================================================== -->
+  <div class="row g-4">
+
+    <!-- LEFT COLUMN: PHOTO GALLERY & DESCRIPTION -->
+    <div class="col-lg-8">
+
+      <!-- Main Photo -->
+      <div class="gallery-main" id="mainGalleryBox">
+        <% const mainImg = (place.images && place.images.length > 0 && place.images[0]) ? place.images[0] : 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=80'; %>
+        <img
+          id="mainImagePreview"
+          src="<%= mainImg %>"
+          alt="<%= place.name %>"
+          onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=80';"
+        >
+      </div>
+
+      <!-- Thumbnail Strip -->
+      <% if (place.images && place.images.length > 1) { %>
+        <div class="thumb-grid">
+          <% place.images.forEach((img, idx) => { %>
+            <div class="thumb-item <%= idx === 0 ? 'active' : '' %>" onclick="switchImage('<%= img %>', this)">
+              <img
+                src="<%= img %>"
+                alt="<%= place.name %> photo <%= idx + 1 %>"
+                onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80';"
+              >
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <!-- About & Overview Card -->
+      <div class="detail-card mt-4">
+        <h3 class="card-title-custom">
+          <i class="fa-solid fa-circle-info"></i>
+          About <%= place.name %>
+        </h3>
+        <p class="text-secondary" style="font-size: 1.05rem; line-height: 1.85;">
+          <%= place.description || 'Discover the rich historical, cultural, and environmental heritage of this iconic Maharashtra destination.' %>
+        </p>
+
+        <!-- Fast Facts Box Grid -->
+        <div class="stats-grid mt-4">
+          <div class="stat-box">
+            <div class="label"><i class="fa-regular fa-calendar-check text-success"></i> Best Time</div>
+            <p class="value"><%= place.bestTime || 'Oct – Mar' %></p>
+          </div>
+
+          <div class="stat-box">
+            <div class="label"><i class="fa-regular fa-clock text-info"></i> Visiting Hours</div>
+            <p class="value"><%= place.openingTime || '09:00 AM' %> – <%= place.closingTime || '06:00 PM' %></p>
+          </div>
+
+          <div class="stat-box">
+            <div class="label"><i class="fa-solid fa-indian-rupee-sign text-warning"></i> Indian Entry</div>
+            <p class="value"><%= (place.entryFee && place.entryFee.indian !== null && place.entryFee.indian !== undefined) ? ('₹' + place.entryFee.indian) : 'Free Entry' %></p>
+          </div>
+
+          <div class="stat-box">
+            <div class="label"><i class="fa-solid fa-globe text-primary"></i> Foreign Entry</div>
+            <p class="value"><%= (place.entryFee && place.entryFee.foreign !== null && place.entryFee.foreign !== undefined) ? ('₹' + place.entryFee.foreign) : 'Free Entry' %></p>
+          </div>
+        </div>
+
+        <% if (place.entryFee && place.entryFee.notes) { %>
+          <div class="p-3 bg-light rounded-3 border">
+            <small class="text-muted d-block">
+              <i class="fa-solid fa-circle-exclamation me-1 text-secondary"></i>
+              <strong>Ticketing Note:</strong> <%= place.entryFee.notes %>
+            </small>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Activities & Experiences Card -->
+      <% if (place.activities && place.activities.length > 0) { %>
+        <div class="detail-card">
+          <h3 class="card-title-custom">
+            <i class="fa-solid fa-person-hiking"></i>
+            Key Features & Activities
+          </h3>
+          <p class="text-muted small mb-3">Popular experiences and things to do when visiting <%= place.name %>:</p>
+          <div>
+            <% place.activities.forEach(act => { %>
+              <span class="activity-chip">
+                <i class="fa-solid fa-check text-success"></i>
+                <%= act %>
+              </span>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Interactive Map Card -->
+      <div class="detail-card">
+        <h3 class="card-title-custom">
+          <i class="fa-solid fa-map-location-dot"></i>
+          Interactive Location Map
+        </h3>
+
+        <div id="placeMap"></div>
+
+        <div class="map-actions">
+          <% const lat = place.location && place.location.latitude ? place.location.latitude : 18.5204; %>
+          <% const lng = place.location && place.location.longitude ? place.location.longitude : 73.8567; %>
+
+          <a
+            href="https://www.google.com/maps/dir/?api=1&destination=<%= lat %>,<%= lng %>"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-map-action btn-directions"
+          >
+            <i class="fa-solid fa-diamond-turn-right"></i>
+            Get Directions in Google Maps
+          </a>
+
+          <button
+            type="button"
+            class="btn-map-action btn-copy-coords"
+            onclick="copyCoordinates('<%= lat %>', '<%= lng %>')"
+            id="copyCoordsBtn"
+          >
+            <i class="fa-regular fa-copy"></i>
+            Copy GPS: <%= Number(lat).toFixed(4) %>, <%= Number(lng).toFixed(4) %>
+          </button>
+        </div>
+
+        <div class="mt-3 p-3 bg-light rounded-3 border">
+          <small class="text-muted d-block">
+            <strong><i class="fa-solid fa-location-dot me-1 text-danger"></i> Complete Address:</strong>
+            <%= place.location && place.location.address ? place.location.address : (place.name + ', ' + place.district + ', Maharashtra, India') %>
+          </small>
+        </div>
+      </div>
+
+      <!-- Nearby Places -->
+      <% if (place.nearbyPlaces && place.nearbyPlaces.length > 0) { %>
+        <div class="detail-card">
+          <h3 class="card-title-custom">
+            <i class="fa-solid fa-compass"></i>
+            Nearby Attractions in <%= place.district %>
+          </h3>
+          <p class="text-muted small mb-3">Expand your itinerary by visiting these recommended attractions nearby:</p>
+          <div class="d-flex flex-wrap gap-2">
+            <% place.nearbyPlaces.forEach(nearby => { %>
+              <a
+                href="/explore?search=<%= encodeURIComponent(nearby) %>"
+                class="nearby-chip"
+                title="Search <%= nearby %>"
+              >
+                <i class="fa-solid fa-arrow-up-right-from-square text-success"></i>
+                <%= nearby %>
+              </a>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+
+    <!-- RIGHT COLUMN: PLANNER ACTIONS, AUTHOR & SAFETY INFO -->
+    <div class="col-lg-4">
+
+      <!-- Action Box: Add to Planner -->
+      <div class="action-box">
+        <h4><i class="fa-solid fa-suitcase-rolling me-2"></i>Trip Itinerary</h4>
+        <p>Add <%= place.name %> directly to your customized Maharashtra manual planner or plan with AI.</p>
+
+        <form action="/m-planner/<%= place._id %>" method="POST" class="m-0">
+          <button type="submit" class="btn-add-planner">
+            <i class="fa-solid fa-plus-circle"></i>
+            Add to Manual Planner
+          </button>
+        </form>
+
+        <a href="/planner" class="btn-plan-ai">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          Generate AI Itinerary
+        </a>
+      </div>
+
+      <!-- Author / Curator Profile Card -->
+      <div class="detail-card">
+        <h4 class="card-title-custom">
+          <i class="fa-solid fa-user-pen"></i>
+          Curator & Author
+        </h4>
+
+        <div class="author-card">
+          <div class="author-avatar">
+            <% if (place.author && place.author.username) { %>
+              <%= place.author.username.charAt(0).toUpperCase() %>
+            <% } else { %>
+              <i class="fa-solid fa-landmark"></i>
+            <% } %>
+          </div>
+
+          <div class="author-info">
+            <h6>
+              <%= place.author ? place.author.username : 'Maharashtra Tourism Board' %>
+            </h6>
+
+            <div class="author-role">
+              <i class="fa-solid fa-circle-check"></i>
+              <% if (place.author && place.author.role === 'admin') { %>
+                Official Admin & Curator
+              <% } else if (place.author) { %>
+                Verified Guide Contributor
+              <% } else { %>
+                State Tourism Department (MTDC)
+              <% } %>
+            </div>
+
+            <div class="author-meta">
+              <span>Verified Destination Record</span><br>
+              <span>Updated: <%= place.updatedAt ? new Date(place.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Official' %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-top">
+          <small class="text-muted d-block" style="font-size: 0.78rem; line-height: 1.5;">
+            <i class="fa-solid fa-shield-halved text-success me-1"></i>
+            Information reviewed for tourism safety, entry timings, fee schedules, and road access guidelines.
+          </small>
+        </div>
+      </div>
+
+      <!-- Tourist Safety & Geo-Fence Box -->
+      <% if (place.geoFence && place.geoFence.enabled) { %>
+        <div class="detail-card border-success border-opacity-25 bg-success bg-opacity-10">
+          <h4 class="card-title-custom text-success">
+            <i class="fa-solid fa-shield-heart text-success"></i>
+            Tourist Safety & GeoFence
+          </h4>
+
+          <div class="d-flex align-items-start gap-3">
+            <div class="fs-1 text-success">
+              <i class="fa-solid fa-tower-broadcast"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-dark fw-semibold" style="font-size: 0.95rem;">
+                Geo-Fence Radius: <%= place.geoFence.radius || 500 %> meters
+              </p>
+              <p class="text-secondary small mb-2">
+                Zone Status: <strong class="text-success"><%= (place.geoFence.status || 'Active Safe Zone').toUpperCase() %></strong>
+              </p>
+              <% if (place.geoFence.restrictedReason) { %>
+                <div class="alert alert-warning py-2 px-3 small mb-2">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                  <%= place.geoFence.restrictedReason %>
+                </div>
+              <% } %>
+              <a href="/safety" class="btn btn-sm btn-outline-success rounded-pill fw-semibold">
+                View Safety Zones <i class="fa-solid fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- District Emergency & Travel Helper -->
+      <div class="detail-card">
+        <h4 class="card-title-custom">
+          <i class="fa-solid fa-headset"></i>
+          Helpline & Emergency
+        </h4>
+        <ul class="list-unstyled mb-0 small">
+          <li class="py-2 border-bottom d-flex justify-content-between">
+            <span class="text-muted">Tourist Police Helpline:</span>
+            <strong class="text-dark">1363 / 112</strong>
+          </li>
+          <li class="py-2 border-bottom d-flex justify-content-between">
+            <span class="text-muted">Maharashtra Ambulance:</span>
+            <strong class="text-dark">108</strong>
+          </li>
+          <li class="py-2 border-bottom d-flex justify-content-between">
+            <span class="text-muted">Disaster Management:</span>
+            <strong class="text-dark">1077</strong>
+          </li>
+          <li class="pt-2 d-flex justify-content-between">
+            <span class="text-muted">District Control:</span>
+            <strong class="text-dark"><%= place.district %> HQ</strong>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Admin Actions (Only for Admin Users) -->
+      <% if (currentlogin && currentlogin.role === "admin") { %>
+        <div class="detail-card border-warning border-opacity-50">
+          <h4 class="card-title-custom text-warning-emphasis">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            Admin Management
+          </h4>
+          <p class="text-muted small">You are logged in as an administrator. Manage this destination:</p>
+
+          <div class="d-flex gap-2">
+            <a href="/places/<%= place._id %>/edit" class="btn btn-warning flex-grow-1 rounded-3 fw-bold text-dark">
+              <i class="fa-solid fa-pen-to-square me-1"></i> Edit Place
+            </a>
+
+            <form action="/places/<%= place._id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete <%= place.name %>?');" class="m-0">
+              <button type="submit" class="btn btn-outline-danger rounded-3 fw-bold">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     PAGE SCRIPTS: INTERACTIVE LEAFLET MAP & GALLERY
+========================================================== -->
+<script>
+  // Image switcher
+  function switchImage(imgSrc, el) {
+    const preview = document.getElementById('mainImagePreview');
+    if (preview) {
+      preview.src = imgSrc;
+    }
+    document.querySelectorAll('.thumb-item').forEach(item => item.classList.remove('active'));
+    if (el) {
+      el.classList.add('active');
+    }
+  }
+
+  // Copy GPS Coordinates
+  function copyCoordinates(lat, lng) {
+    const text = lat + ', ' + lng;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyCoordsBtn');
+      if (btn) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check text-success"></i> Copied!';
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+        }, 2000);
+      }
+    }).catch(err => {
+      alert('GPS Coordinates: ' + text);
+    });
+  }
+
+  // Leaflet Map Initialization
+  document.addEventListener('DOMContentLoaded', function () {
+    const lat = <%= (place.location && Number(place.location.latitude)) ? Number(place.location.latitude) : 18.5204 %>;
+    const lng = <%= (place.location && Number(place.location.longitude)) ? Number(place.location.longitude) : 73.8567 %>;
+    const placeName = "<%= place.name.replace(/"/g, '&quot;') %>";
+    const category = "<%= (place.category || 'Tourist Attraction').replace(/"/g, '&quot;') %>";
+    const geoRadius = <%= (place.geoFence && place.geoFence.enabled && place.geoFence.radius) ? place.geoFence.radius : 0 %>;
+
+    try {
+      const map = L.map('placeMap').setView([lat, lng], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Custom popup
+      const popupContent = `
+        <div style="font-family: inherit; min-width: 170px;">
+          <h6 style="margin: 0 0 4px; font-weight: 700; color: #198754;">${placeName}</h6>
+          <span style="font-size: 0.75rem; background: #e8f5e9; color: #1b5e20; padding: 2px 8px; border-radius: 10px; font-weight: 600;">${category}</span>
+          <div style="margin-top: 8px;">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="color: #0d6efd; font-size: 0.8rem; font-weight: 600; text-decoration: none;">
+              Get Directions &rarr;
+            </a>
+          </div>
+        </div>
+      `;
+
+      const marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup(popupContent).openPopup();
+
+      // If GeoFence is enabled, draw radius circle
+      if (geoRadius > 0) {
+        L.circle([lat, lng], {
+          radius: geoRadius,
+          color: '#198754',
+          fillColor: '#28a745',
+          fillOpacity: 0.15,
+          weight: 2
+        }).addTo(map);
+      }
+
+      // Ensure proper tile sizing after load
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+
+    } catch (e) {
+      console.error('Leaflet map initialization failed:', e);
+    }
+  });
+</script>

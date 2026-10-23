@@ -1,0 +1,253 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .admin-places-page {
+    max-width: 1240px;
+    margin: 25px auto 80px;
+    padding: 0 15px;
+  }
+
+  .admin-header-box {
+    background: linear-gradient(135deg, #183c2c 0%, #198754 100%);
+    color: white;
+    padding: 2.25rem 2rem;
+    border-radius: 22px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 30px rgba(24, 60, 44, 0.2);
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .table-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e0eee7;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .place-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    background-color: #e9ecef;
+  }
+</style>
+
+<div class="admin-places-page">
+
+  <!-- HEADER -->
+  <div class="admin-header-box d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-map-location-dot me-1"></i> Destinations Directory
+      </div>
+      <h2 class="fw-bold mb-1">Manage Tourist Destinations</h2>
+      <p class="mb-0 opacity-90 small">
+        View, edit, search, and manage all tourism spots, heritage sites, and attractions across Maharashtra.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/admin/new" class="btn btn-warning text-dark fw-bold rounded-pill px-3 py-2 shadow-sm">
+        <i class="fa-solid fa-plus me-1"></i> Add Destination
+      </a>
+      <a href="/dashboard" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-gauge me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Total Places</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalPlaces || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-success fs-4">
+            <i class="fa-solid fa-mountain-sun"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Districts Covered</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalDistricts || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-primary fs-4">
+            <i class="fa-solid fa-map-pin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Categories</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= categoriesCount || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-warning fs-4">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Geofence Configured</span>
+            <h3 class="fw-bold text-success mt-1 mb-0"><%= geofencedCount || 0 %></h3>
+          </div>
+          <div class="p-3 bg-success-subtle rounded-circle text-success fs-4">
+            <i class="fa-solid fa-satellite-dish"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE CONTAINER -->
+  <div class="table-card">
+
+    <!-- Filter & Search Bar -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-3 border-bottom">
+      <h5 class="fw-bold text-dark mb-0">
+        <i class="fa-solid fa-list-check text-success me-2"></i> All Destinations (<%= places.length %>)
+      </h5>
+
+      <form method="GET" action="/places" class="d-flex gap-2 flex-wrap">
+        <input 
+          type="text" 
+          name="search" 
+          class="form-control form-control-sm" 
+          placeholder="Search destination or district..." 
+          value="<%= search || '' %>"
+          style="width: 240px;"
+        >
+        
+        <select name="category" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+          <option value="all">All Categories</option>
+          <% allCategories.forEach(cat => { %>
+            <option value="<%= cat %>" <%= currentCategory === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }); %>
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-success px-3">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <% if (search || (currentCategory && currentCategory !== 'all')) { %>
+          <a href="/places" class="btn btn-sm btn-outline-secondary">Reset</a>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr class="small text-uppercase text-secondary">
+            <th>Photo</th>
+            <th>Destination & District</th>
+            <th>Category</th>
+            <th>Rating</th>
+            <th>Geo-Coordinates</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!places || places.length === 0) { %>
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-location-dot fs-3 d-block mb-2"></i>
+                No tourist places found matching your search.
+              </td>
+            </tr>
+          <% } else { %>
+            <% places.forEach(p => { %>
+              <tr>
+                <td>
+                  <% if (p.images && p.images.length > 0 && p.images[0]) { %>
+                    <img src="<%= p.images[0] %>" alt="<%= p.name %>" class="place-thumbnail shadow-sm">
+                  <% } else { %>
+                    <div class="place-thumbnail d-flex align-items-center justify-content-center text-muted">
+                      <i class="fa-solid fa-image"></i>
+                    </div>
+                  <% } %>
+                </td>
+
+                <td>
+                  <strong class="text-dark d-block"><%= p.name %></strong>
+                  <span class="text-muted small">
+                    <i class="fa-solid fa-location-dot text-danger me-1"></i><%= p.district || 'Maharashtra' %>
+                  </span>
+                </td>
+
+                <td>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <%= p.category || 'General' %>
+                  </span>
+                </td>
+
+                <td>
+                  <div class="small fw-bold text-dark">
+                    <i class="fa-solid fa-star text-warning me-1"></i><%= p.rating || '4.0' %>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="small font-monospace text-muted">
+                    <%= (Number(p.location?.latitude ?? p.latitude ?? 0) || 0).toFixed(4) %>, <%= (Number(p.location?.longitude ?? p.longitude ?? 0) || 0).toFixed(4) %>
+                  </div>
+                </td>
+
+                <td class="text-end">
+                  <div class="d-flex gap-1 justify-content-end">
+                    <a href="/touristplaces/<%= p._id %>" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="View Place">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+
+                    <a href="/places/<%= p._id %>/edit" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Edit Place">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+
+                    <form action="/places/<%= p._id %>/delete" method="POST" class="d-inline m-0" onsubmit="return confirm('Are you sure you want to delete <%= p.name %>?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete Place">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

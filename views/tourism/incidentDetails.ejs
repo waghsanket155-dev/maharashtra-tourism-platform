@@ -1,0 +1,325 @@
+<% layout("layout/boilerplate") %>
+
+<!-- Leaflet CSS & JS for location display -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  .incident-details-container {
+    max-width: 950px;
+    margin: 30px auto 80px;
+    padding: 0 15px;
+  }
+
+  .details-hero {
+    background: linear-gradient(135deg, #126b47 0%, #198754 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.18);
+  }
+
+  .details-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .details-card-title {
+    color: #123c2b;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid #eef6f2;
+    padding-bottom: 0.6rem;
+  }
+
+  #incidentMap {
+    height: 300px;
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid #dce8e1;
+    z-index: 1;
+  }
+
+  .status-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    font-weight: 700;
+  }
+
+  .status-badge-inprogress {
+    background: #cff4fc;
+    color: #055160;
+    border: 1px solid #b6effb;
+    font-weight: 700;
+  }
+
+  .status-badge-resolved {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    font-weight: 700;
+  }
+
+  .status-badge-rejected {
+    background: #e2e3e5;
+    color: #41464b;
+    border: 1px solid #d3d6d8;
+    font-weight: 700;
+  }
+</style>
+
+<% 
+  let statusClass = "status-badge-pending";
+  if (incident.status === "In Progress") statusClass = "status-badge-inprogress";
+  else if (incident.status === "Resolved") statusClass = "status-badge-resolved";
+  else if (incident.status === "Rejected") statusClass = "status-badge-rejected";
+
+  const typeMap = {
+    medical_emergency: "🩺 Medical Emergency",
+    lost_tourist: "🧭 Lost or Separated Tourist",
+    harassment_safety: "🛡️ Harassment / Personal Safety Concern",
+    accident_injury: "🩹 Accident or Injury",
+    unsafe_restricted_area: "⚠️ Unsafe or Restricted Area",
+    lost_belongings: "🧳 Lost Belongings",
+    other: "📋 Other Incident"
+  };
+  const formattedType = typeMap[incident.incidentType] || incident.incidentType;
+  const hasCoords = incident.locationConsent && incident.location && incident.location.latitude && incident.location.longitude;
+%>
+
+<div class="incident-details-container">
+
+  <!-- HEADER -->
+  <div class="details-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge <%= statusClass %> px-3 py-1 rounded-pill fs-6">
+          <%= incident.status %>
+        </span>
+        <span class="badge bg-light text-dark font-monospace px-3 py-1 rounded-pill fs-6">
+          <%= incident.reportId %>
+        </span>
+      </div>
+      <h2 class="fw-bold mb-1"><%= formattedType %></h2>
+      <p class="mb-0 opacity-90 small">
+        Submitted on <%= incident.createdAt ? new Date(incident.createdAt).toLocaleString() : 'N/A' %>
+      </p>
+    </div>
+
+    <div>
+      <% if (isAdminView) { %>
+        <a href="/admin/incidents" class="btn btn-light text-success fw-bold rounded-pill px-3 py-2 shadow-sm">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to All Incidents
+        </a>
+      <% } else { %>
+        <a href="/my-incidents" class="btn btn-light text-success fw-bold rounded-pill px-3 py-2 shadow-sm">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to My Reports
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+
+      <!-- INCIDENT DETAILS CARD -->
+      <div class="details-card">
+        <div class="details-card-title">
+          <i class="fa-solid fa-file-lines text-success"></i>
+          <span>Report Information</span>
+        </div>
+
+        <div class="mb-3">
+          <label class="small text-muted fw-bold d-block mb-1">Incident Category</label>
+          <div class="fs-6 fw-semibold text-dark"><%= formattedType %></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="small text-muted fw-bold d-block mb-1">Detailed Description</label>
+          <div class="p-3 bg-light rounded-3 text-dark border" style="white-space: pre-wrap; font-size: 0.95rem;"><%= incident.description %></div>
+        </div>
+
+        <% if (incident.contactInfo && (incident.contactInfo.phone || incident.contactInfo.alternateContact)) { %>
+          <div class="mb-3">
+            <label class="small text-muted fw-bold d-block mb-1">Contact Details Provided</label>
+            <div class="fw-semibold text-dark">
+              📞 <%= incident.contactInfo.phone || incident.contactInfo.alternateContact %>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (isAdminView && incident.user) { %>
+          <div class="mb-3 p-3 bg-light rounded-3 border border-primary-subtle">
+            <label class="small text-primary fw-bold d-block mb-1">
+              <i class="fa-solid fa-user me-1"></i> Reporting User (Admin View)
+            </label>
+            <div class="text-dark small">
+              <strong>Username:</strong> <%= incident.user.username %><br>
+              <strong>Email:</strong> <%= incident.user.email %><br>
+              <strong>User ID:</strong> <%= incident.user._id %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- CONSENTED LOCATION CARD -->
+      <div class="details-card">
+        <div class="details-card-title">
+          <i class="fa-solid fa-location-dot text-danger"></i>
+          <span>Attached Location Data</span>
+        </div>
+
+        <% if (hasCoords) { %>
+          <div class="alert alert-success py-2 px-3 small mb-3">
+            <i class="fa-solid fa-circle-check me-1"></i>
+            User gave explicit consent to attach their GPS coordinates to this report.
+          </div>
+
+          <% if (incident.location && incident.location.address) { %>
+            <div class="mb-3 p-2 bg-light rounded border">
+              <span class="small text-muted d-block">Consented Location / Address:</span>
+              <strong class="text-dark"><%= incident.location.address %></strong>
+            </div>
+          <% } %>
+
+          <div class="row g-2 mb-3">
+            <div class="col-sm-4">
+              <div class="p-2 bg-light rounded border text-center">
+                <small class="text-muted d-block">Latitude</small>
+                <strong><%= incident.location.latitude.toFixed(5) %></strong>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-2 bg-light rounded border text-center">
+                <small class="text-muted d-block">Longitude</small>
+                <strong><%= incident.location.longitude.toFixed(5) %></strong>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-2 bg-light rounded border text-center">
+                <small class="text-muted d-block">Accuracy</small>
+                <strong><%= incident.location.accuracy ? '±' + Math.round(incident.location.accuracy) + 'm' : 'Standard' %></strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Embedded Map -->
+          <div id="incidentMap" class="mb-3"></div>
+
+          <a 
+            href="https://www.google.com/maps/search/?api=1&query=<%= incident.location.latitude %>,<%= incident.location.longitude %>" 
+            target="_blank" 
+            class="btn btn-sm btn-outline-success rounded-pill fw-semibold"
+          >
+            <i class="fa-brands fa-google me-1"></i> Open Location in Google Maps
+          </a>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              const lat = <%= incident.location.latitude %>;
+              const lng = <%= incident.location.longitude %>;
+              const map = L.map('incidentMap').setView([lat, lng], 14);
+
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+              }).addTo(map);
+
+              L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup("<strong>📍 Incident Location</strong><br><small>Report: <%= incident.reportId %></small>")
+                .openPopup();
+
+              <% if (incident.location.accuracy) { %>
+                L.circle([lat, lng], {
+                  radius: <%= incident.location.accuracy %>,
+                  color: '#dc3545',
+                  fillColor: '#dc3545',
+                  fillOpacity: 0.12
+                }).addTo(map);
+              <% } %>
+            });
+          </script>
+
+        <% } else { %>
+          <div class="text-center py-4 bg-light rounded-3 border text-muted small">
+            <i class="fa-solid fa-location-slash fs-3 d-block mb-2 text-secondary"></i>
+            No GPS location was attached to this report. (User opted out or location was unavailable).
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-lg-4">
+
+      <% if (isAdminView) { %>
+        <!-- ADMIN STATUS & NOTES UPDATE FORM -->
+        <div class="details-card border-primary-subtle">
+          <div class="details-card-title text-primary">
+            <i class="fa-solid fa-gears"></i>
+            <span>Update Incident Status</span>
+          </div>
+
+          <form action="/admin/incidents/<%= incident._id %>/status?_method=PATCH" method="POST">
+            <div class="mb-3">
+              <label for="adminStatusSelect" class="form-label small fw-bold">Update Status</label>
+              <select class="form-select form-select-sm" id="adminStatusSelect" name="status" required>
+                <option value="Pending" <%= incident.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="In Progress" <%= incident.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                <option value="Resolved" <%= incident.status === 'Resolved' ? 'selected' : '' %>>Resolved</option>
+                <option value="Rejected" <%= incident.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="adminNotesTextarea" class="form-label small fw-bold">Internal Admin Notes</label>
+              <textarea class="form-control form-control-sm" id="adminNotesTextarea" name="adminNotes" rows="4" placeholder="Enter resolution notes, responder actions taken, or internal follow-ups..."><%= incident.adminNotes || '' %></textarea>
+              <div class="form-text small" style="font-size: 0.75rem;">Internal notes are only visible to authorized administrators.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold rounded-pill py-2">
+              <i class="fa-solid fa-floppy-disk me-1"></i> Update Report Status
+            </button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- EMERGENCY CONTACTS REMINDER CARD -->
+      <div class="details-card">
+        <div class="details-card-title">
+          <i class="fa-solid fa-phone text-success"></i>
+          <span>Emergency Hotlines</span>
+        </div>
+        <p class="small text-muted mb-2">For immediate life-threatening danger, contact local emergency services directly:</p>
+        <div class="d-flex flex-column gap-2 small">
+          <a href="tel:112" class="btn btn-outline-danger btn-sm text-start fw-bold">
+            <i class="fa-solid fa-phone me-2"></i> 112 — National Helpline
+          </a>
+          <a href="tel:100" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="fa-solid fa-shield me-2"></i> 100 — Police
+          </a>
+          <a href="tel:108" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="fa-solid fa-truck-medical me-2"></i> 108 — Ambulance
+          </a>
+          <a href="tel:1363" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="fa-solid fa-headset me-2"></i> 1363 — Tourist Assistance
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

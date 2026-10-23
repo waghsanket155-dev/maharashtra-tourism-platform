@@ -1,0 +1,632 @@
+<style>
+
+  :root {
+    --brand-bg: #cae6da;
+    --brand-accent: #0a7c2a;
+  }
+
+  body {
+    padding-top: 60px;
+  }
+
+  /* ---------- Animated Navbar ---------- */
+
+  .navbar {
+    background: linear-gradient(
+      270deg,
+      #cae6da,
+      #a9d6c5,
+      #cae6da
+    );
+
+    background-size: 600% 600%;
+    animation: gradientShift 10s ease infinite;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s ease;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .dark{
+    font-weight: bold;
+  }
+
+  .navbar:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+
+  /* ---------- Logo ---------- */
+
+  .navbar-brand i {
+    color: #0a7c2a;
+    display: inline-block;
+    transition: transform 0.6s ease;
+  }
+
+  .navbar-brand:hover i {
+    transform: rotate(360deg) scale(1.15);
+  }
+
+  /* ---------- Nav Links ---------- */
+
+  .navbar-nav .nav-link {
+    position: relative;
+    margin: 0 0.25rem;
+    transition: color 0.3s ease;
+  }
+
+  .navbar-nav .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background-color: var(--brand-accent);
+    transition: width 0.3s ease;
+  }
+
+  .navbar-nav .nav-link:hover {
+    color: var(--brand-accent) !important;
+  }
+
+  .navbar-nav .nav-link:hover::after {
+    width: 100%;
+  }
+
+  /* ---------- Nav Animation ---------- */
+
+  .navbar-nav {
+    animation: navDrop 0.6s ease;
+  }
+
+  @keyframes navDrop {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ---------- Dashboard Button ---------- */
+
+  .dashboard-btn {
+    background-color: #2f9e6f;
+    color: #fff !important;
+    border-radius: 1rem;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    transition:
+      transform 0.2s ease,
+      background-color 0.2s ease;
+
+    animation: pulseGlow 2.2s infinite;
+  }
+
+  .dashboard-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  @keyframes pulseGlow {
+
+    0% {
+      box-shadow: 0 0 0 0 rgba(47,158,111,0.45);
+    }
+
+    70% {
+      box-shadow: 0 0 0 8px rgba(47,158,111,0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(47,158,111,0);
+    }
+
+  }
+
+
+  /* =================================================
+     USER MENU
+     ================================================= */
+
+  .user-menu {
+    position: relative;
+    margin-left: 8px;
+  }
+
+  /* User icon button */
+
+  .user-btn {
+    border: none;
+    background: transparent;
+
+    color: #176b3a;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.45rem;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+  }
+
+  .user-btn:hover {
+    background: rgba(10, 124, 42, 0.12);
+    transform: scale(1.08);
+  }
+
+
+  /* ---------- User Dropdown ---------- */
+
+  .user-dropdown {
+    position: absolute;
+
+    right: 0;
+    top: 48px;
+
+    width: 190px;
+
+    background: #ffffff;
+
+    border-radius: 14px;
+
+    padding: 8px;
+
+    box-shadow:
+      0 8px 25px rgba(0,0,0,0.15);
+
+    display: none;
+
+    z-index: 9999;
+  }
+
+  /* Show dropdown */
+
+  .user-dropdown.show {
+    display: block;
+
+    animation: userDrop 0.2s ease;
+  }
+
+  @keyframes userDrop {
+
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+  }
+
+
+  /* Dropdown links */
+
+  .user-dropdown a {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    color: #333;
+
+    font-weight: 500;
+
+    transition: all 0.2s ease;
+  }
+
+  .user-dropdown a:hover {
+    background: #eaf6ef;
+
+    color: #0a7c2a;
+  }
+
+
+  /* Logout */
+
+  .user-dropdown .logout-link:hover {
+    background: #fff0f0;
+
+    color: #dc3545;
+  }
+
+
+  /* Icons */
+
+  .user-dropdown i {
+    width: 18px;
+    text-align: center;
+  }
+
+
+  /* =================================================
+     MOBILE
+     ================================================= */
+
+  @media (max-width: 767px) {
+
+  .navbar-collapse {
+    background-color: white !important;
+    margin-top: 8px;
+    padding: 10px 15px 15px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Home to User menu */
+  .navbar-collapse .navbar-nav {
+    width: 100%;
+  }
+
+  .navbar-collapse .navbar-nav .nav-link {
+    padding: 10px 8px;
+  }
+
+  /* Right side items also become full width */
+  .navbar-collapse .ms-auto {
+    margin-left: 0 !important;
+  }
+
+  /* User icon */
+  .user-menu {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+
+  .user-btn {
+    margin-left: 0;
+  }
+
+  .user-dropdown {
+    right: 0;
+    top: 45px;
+  }
+
+}
+  
+
+</style>
+
+
+<!-- =================================================
+     NAVBAR
+     ================================================= -->
+
+<nav class="navbar navbar-expand-md border-bottom fixed-top">
+
+  <div class="container-fluid">
+
+
+    <!-- Logo -->
+
+    <a class="navbar-brand" href="/home">
+
+      <i class="fa-solid fa-earth-oceania"></i>
+
+    </a>
+
+
+    <!-- Mobile Toggle -->
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+
+      <span class="navbar-toggler-icon"></span>
+
+    </button>
+
+
+    <!-- Navbar Content -->
+
+    <div
+      class="collapse navbar-collapse"
+      id="navbarNavAltMarkup"
+    >
+
+
+      <!-- Left Navigation -->
+
+      <div class="navbar-nav">
+
+        <a
+          class="nav-link"
+          href="/home"
+        >
+          Home
+        </a>
+
+
+        <a
+          class="nav-link"
+          href="/explore"
+        >
+          Explore
+        </a>
+
+      </div>
+
+
+      <!-- Right Navigation -->
+
+      <div class="navbar-nav ms-auto">
+
+
+        <!-- Booking -->
+
+        
+        <a
+          class="nav-link"
+          href="/about"
+        >
+          About Us
+        </a>
+
+        <a
+          class="nav-link"
+          href="https://www.makemytrip.global/?cc=nl"
+        >
+          Booking
+        </a>
+
+
+        <!-- Safety -->
+
+        <a
+          class="nav-link"
+          href="/safety"
+        >
+          Safety
+        </a>
+
+      
+        <a
+          class="nav-link"
+          href="/m-planner"
+        >
+          Manual Planner
+        </a>
+
+        <!-- AI Planner -->
+
+        <a
+          class="nav-link"
+          href="/planner"
+        >
+          AI Planner
+        </a>
+
+        <!-- =================================================
+             ADMIN DASHBOARD BADGE (top navbar for Admin)
+             ================================================= -->
+
+        <% if (currentlogin && currentlogin.role === "admin") { %>
+
+          <a
+            class="nav-link dashboard-btn me-2"
+            href="/dashboard"
+          >
+            <i class="fa-solid fa-gauge-high me-1"></i>
+            Dashboard
+          </a>
+
+        <% } %>
+
+
+        <!-- =================================================
+             LOGIN / SIGNUP (Logged out)
+             ================================================= -->
+
+        <% if (!currentlogin) { %>
+
+          <!-- Login -->
+
+          <a
+            class="nav-link dark"
+            href="/login"
+          >
+           
+            Login
+          </a>
+
+          <!-- Sign Up -->
+
+          <a
+            class="nav-link dark"
+            href="/signup"
+          >
+           
+            Sign Up
+          </a>
+
+        <% } else { %>
+
+
+          <!-- =================================================
+               USER MENU (Logged in)
+               ================================================= -->
+
+          <div class="user-menu">
+
+            <!-- User button -->
+
+            <button
+              class="user-btn"
+              type="button"
+              onclick="toggleUserMenu()"
+              title="<%= currentlogin.username %>"
+            >
+              <i class="fa-solid fa-circle-user"></i>
+            </button>
+
+
+            <!-- Dropdown Menu -->
+
+            <div
+              class="user-dropdown"
+              id="userDropdown"
+            >
+
+              <!-- User name header -->
+              <div class="px-2 py-1 border-bottom mb-1 text-truncate">
+                <strong class="d-block text-dark small"><%= currentlogin.username %></strong>
+                <span class="badge <%= currentlogin.role === 'admin' ? 'bg-danger' : 'bg-secondary' %>" style="font-size: 0.7rem;">
+                  <%= currentlogin.role === 'admin' ? 'Admin' : 'Traveler' %>
+                </span>
+              </div>
+
+              <!-- My Trips -->
+
+              <a href="/my-trips">
+                <i class="fa-solid fa-suitcase-rolling"></i>
+                My Trips
+              </a>
+
+              <!-- My Incidents -->
+              <a href="/my-incidents">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                My Incidents
+              </a>
+
+              <% if (currentlogin.role === "admin") { %>
+                <div class="border-top my-1"></div>
+
+                <!-- Manage Destinations -->
+                <a href="/places">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                  Manage Destinations
+                </a>
+
+                <!-- Manage Users -->
+                <a href="/admin/users">
+                  <i class="fa-solid fa-users-gear"></i>
+                  Manage Users
+                </a>
+
+                <!-- Manage Safety Zones -->
+                <a href="/admin/safety-zones">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  Manage Safety Zones
+                </a>
+
+                <!-- Manage Incidents -->
+                <a href="/admin/incidents">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  Manage Incidents
+                </a>
+              <% } %>
+
+              <div class="border-top my-1"></div>
+
+              <!-- Logout -->
+
+              <a
+                href="/logout"
+                class="logout-link"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+              </a>
+
+            </div>
+
+          </div>
+
+        <% } %>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</nav>
+
+
+<!-- =================================================
+     USER MENU JAVASCRIPT
+     ================================================= -->
+
+<script>
+
+  function toggleUserMenu() {
+
+    const dropdown =
+      document.getElementById("userDropdown");
+
+    if (dropdown) {
+
+      dropdown.classList.toggle("show");
+
+    }
+
+  }
+
+
+  /* Close dropdown when clicking outside */
+
+  document.addEventListener("click", function(event) {
+
+    const menu =
+      document.querySelector(".user-menu");
+
+    const dropdown =
+      document.getElementById("userDropdown");
+
+
+    if (
+      menu &&
+      dropdown &&
+      !menu.contains(event.target)
+    ) {
+
+      dropdown.classList.remove("show");
+
+    }
+
+  });
+
+</script>

@@ -1,0 +1,197 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .safety-form-container {
+    max-width: 900px;
+    margin: 30px auto 80px;
+    padding: 0 15px;
+  }
+
+  .form-card {
+    background: #ffffff;
+    border-radius: 22px;
+    border: 1px solid #e0eee7;
+    padding: 2.25rem;
+    box-shadow: 0 10px 30px rgba(18, 60, 43, 0.08);
+  }
+
+  .form-header-box {
+    background: linear-gradient(135deg, #0e3d2f 0%, #198754 100%);
+    color: white;
+    padding: 1.75rem 2rem;
+    border-radius: 18px;
+    margin-bottom: 2rem;
+  }
+</style>
+
+<div class="safety-form-container">
+
+  <!-- HEADER -->
+  <div class="form-header-box d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-shield-halved me-1"></i> Admin Portal
+      </div>
+      <h3 class="fw-bold mb-1"><%= isEdit ? "Edit Safety Zone Details" : "Create New Safety Zone" %></h3>
+      <p class="mb-0 opacity-90 small">
+        <%= isEdit ? "Update verified coordinates, official notification references, or restriction reasons." : "Register an officially recognized protected area, caution zone, or tourist safe zone." %>
+      </p>
+    </div>
+
+    <a href="/admin/safety-zones" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Zones
+    </a>
+  </div>
+
+  <!-- GUIDELINES ALERT -->
+  <div class="alert alert-info border border-info-subtle rounded-3 small mb-4">
+    <strong class="d-block mb-1"><i class="fa-solid fa-landmark me-1"></i> Maharashtra Official Data Sources Reference:</strong>
+    Ensure entries are backed by authentic gazette notifications or official circulars:
+    <ul class="mb-1 mt-1 ps-3">
+      <li><strong>Maharashtra Forest Dept:</strong> <a href="https://mahaforest.gov.in/" target="_blank" class="alert-link">mahaforest.gov.in</a></li>
+      <li><strong>MoEFCC Eco-Sensitive Zones:</strong> <a href="https://moef.gov.in/esz-notifications" target="_blank" class="alert-link">moef.gov.in/esz-notifications</a></li>
+      <li><strong>Wildlife Institute of India Gazette:</strong> <a href="https://v1.wii.gov.in/protectedareagazette_maharashtra" target="_blank" class="alert-link">v1.wii.gov.in</a></li>
+      <li><strong>Maharashtra Tourism:</strong> <a href="https://maharashtratourism.gov.in/" target="_blank" class="alert-link">maharashtratourism.gov.in</a></li>
+    </ul>
+    <em>Do not invent boundaries or legal claims. If precise coordinates are unavailable, create as pending for manual surveyor verification.</em>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <form action="<%= action %>" method="POST" id="safetyZoneForm">
+
+      <!-- SECTION 1: ZONE IDENTITY -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-map-pin text-success me-2"></i> Zone Identification
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-7">
+          <label for="name" class="form-label fw-bold small">Zone / Area Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="150" value="<%= zone ? zone.name : '' %>" placeholder="e.g. Sanjay Gandhi National Park Core Wildlife Zone">
+        </div>
+
+        <div class="col-md-5">
+          <label for="district" class="form-label fw-bold small">Maharashtra District <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="district" name="district" required maxlength="80" value="<%= zone ? zone.district : '' %>" placeholder="e.g. Pune, Satara, Mumbai, Chandrapur">
+        </div>
+      </div>
+
+      <!-- SECTION 2: GEOGRAPHY & BOUNDARY -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-location-crosshairs text-success me-2"></i> Geographic Coordinates & Radius
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label for="latitude" class="form-label fw-bold small">Latitude (°N) <span class="text-danger">*</span></label>
+          <input type="number" step="any" min="-90" max="90" class="form-control font-monospace" id="latitude" name="latitude" required value="<%= zone ? zone.latitude : '' %>" placeholder="e.g. 19.2288">
+        </div>
+
+        <div class="col-md-4">
+          <label for="longitude" class="form-label fw-bold small">Longitude (°E) <span class="text-danger">*</span></label>
+          <input type="number" step="any" min="-180" max="180" class="form-control font-monospace" id="longitude" name="longitude" required value="<%= zone ? zone.longitude : '' %>" placeholder="e.g. 72.9182">
+        </div>
+
+        <div class="col-md-4">
+          <label for="radius" class="form-label fw-bold small">Geofence Radius (metres) <span class="text-danger">*</span></label>
+          <input type="number" min="5" max="100000" class="form-control" id="radius" name="radius" required value="<%= zone ? zone.radius : '' %>" placeholder="e.g. 1500">
+          <div class="form-text small">Circumference for safety distance computation.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: CLASSIFICATION & RESTRICTION REASON -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-triangle-exclamation text-success me-2"></i> Zone Classification & Regulations
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="zoneType" class="form-label fw-bold small">Zone Type <span class="text-danger">*</span></label>
+          <select class="form-select" id="zoneType" name="zoneType" required onchange="toggleRestrictedReasonRequirement()">
+            <option value="restricted_area" <%= (zone && zone.zoneType === 'restricted_area') ? 'selected' : '' %>>⛔ Restricted Area (Prohibited / Core Reserve)</option>
+            <option value="caution_zone" <%= (zone && zone.zoneType === 'caution_zone') ? 'selected' : '' %>>⚠️ Caution Zone (Monsoon Hazard, Fog, Landslide, Strict Protocol)</option>
+            <option value="safe_zone" <%= (zone && zone.zoneType === 'safe_zone') ? 'selected' : '' %>>✅ Safe Zone (Monitored Tourist Hub, Facilitation Center)</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label for="restrictedReason" class="form-label fw-bold small">
+            Restricted Reason / Advisory Details <span id="reasonReqAsterisk" class="text-danger">*</span>
+          </label>
+          <textarea class="form-control" id="restrictedReason" name="restrictedReason" rows="3" maxlength="1000" placeholder="State specific legal and safety reasons (e.g. Inviolate tiger breeding core under Wildlife Protection Act 1972; entry off-limits without written forest permit)."><%= zone ? zone.restrictedReason : '' %></textarea>
+          <div class="form-text small">Mandatory for Restricted Areas and Caution Zones. Displayed directly to tourists in proximity alerts.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: OFFICIAL SOURCE & NOTIFICATION -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-file-contract text-success me-2"></i> Official Government Source & Gazette Reference
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="sourceName" class="form-label fw-bold small">Official Source Authority <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="sourceName" name="sourceName" required maxlength="200" value="<%= zone ? zone.sourceName : '' %>" placeholder="e.g. Maharashtra Forest Department / MoEFCC">
+        </div>
+
+        <div class="col-md-6">
+          <label for="notificationNumber" class="form-label fw-bold small">Notification / Gazette Reference Number</label>
+          <input type="text" class="form-control" id="notificationNumber" name="notificationNumber" maxlength="150" value="<%= zone ? zone.notificationNumber : '' %>" placeholder="e.g. MoEFCC S.O. 3645(E) / Govt Gazette WLP-1084">
+        </div>
+
+        <div class="col-12">
+          <label for="sourceUrl" class="form-label fw-bold small">Official Source URL (http/https) <span class="text-danger">*</span></label>
+          <input type="url" class="form-control" id="sourceUrl" name="sourceUrl" required value="<%= zone ? zone.sourceUrl : '' %>" placeholder="https://mahaforest.gov.in/ or https://moef.gov.in/esz-notifications">
+          <div class="form-text small">Must be a valid government or institutional web link confirming the restrictions.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: VALIDITY PERIOD -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-calendar-days text-success me-2"></i> Validity Period (Optional Seasonal Restrictions)
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="validFrom" class="form-label fw-bold small">Valid From</label>
+          <input type="date" class="form-control" id="validFrom" name="validFrom" value="<%= (zone && zone.validFrom) ? new Date(zone.validFrom).toISOString().split('T')[0] : '' %>">
+        </div>
+
+        <div class="col-md-6">
+          <label for="validUntil" class="form-label fw-bold small">Valid Until</label>
+          <input type="date" class="form-control" id="validUntil" name="validUntil" value="<%= (zone && zone.validUntil) ? new Date(zone.validUntil).toISOString().split('T')[0] : '' %>">
+          <div class="form-text small">Leave blank for permanent round-the-year zones.</div>
+        </div>
+      </div>
+
+      <!-- SUBMIT BUTTONS -->
+      <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+        <a href="/admin/safety-zones" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+        <button type="submit" class="btn btn-success fw-bold rounded-pill px-5 shadow-sm">
+          <i class="fa-solid fa-save me-1"></i> <%= isEdit ? "Update Zone" : "Create Zone (Defaults to Pending)" %>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+  function toggleRestrictedReasonRequirement() {
+    const type = document.getElementById('zoneType').value;
+    const reasonField = document.getElementById('restrictedReason');
+    const asterisk = document.getElementById('reasonReqAsterisk');
+
+    if (type === 'restricted_area' || type === 'caution_zone') {
+      reasonField.required = true;
+      asterisk.classList.remove('d-none');
+    } else {
+      reasonField.required = false;
+      asterisk.classList.add('d-none');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', toggleRestrictedReasonRequirement);
+</script>

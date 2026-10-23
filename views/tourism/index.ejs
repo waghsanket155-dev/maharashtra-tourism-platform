@@ -1,0 +1,1266 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+html,
+body {
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+
+/* =========================================================
+   HERO SECTION
+========================================================= */
+
+.hero {
+    width: 100vw;
+    min-height: 520px;
+
+    margin-left: calc(50% - 50vw);
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.72),
+            rgba(0, 0, 0, 0.40),
+            rgba(0, 0, 0, 0.15)
+        ),
+        url("https://assets.musafir.com/in/Rajgad_be1a83a52e.webp");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
+}
+
+
+/* Moving light effect */
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 450px;
+    height: 450px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    top: -200px;
+    right: -100px;
+
+    animation: heroCircle 8s ease-in-out infinite;
+}
+
+
+/* HERO CONTENT */
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+
+    margin-left: 8%;
+
+    max-width: 700px;
+
+    color: white;
+
+    animation: heroContent 1s ease forwards;
+}
+
+
+.hero-content h1 {
+    margin: 0 0 18px;
+
+    font-size: 48px;
+    line-height: 1.15;
+
+    font-weight: 800;
+
+    text-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.40);
+}
+
+
+.hero-content p {
+    margin: 0 0 28px;
+
+    font-size: 21px;
+    line-height: 1.7;
+
+    color: rgba(255, 255, 255, 0.94);
+}
+
+
+/* HERO ACTIONS & BUTTONS */
+
+.hero-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 26px;
+
+    border-radius: 12px;
+
+    background: #198754;
+
+    color: white !important;
+
+    text-decoration: none;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.25);
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.hero-btn:hover {
+    background: #157347;
+
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 15px 30px rgba(0, 0, 0, 0.32);
+    text-decoration: none;
+}
+
+.hero-btn i {
+    transition: transform 0.3s ease;
+}
+
+.hero-btn:hover i {
+    transform: translateX(5px);
+}
+
+.hero-btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(8px);
+}
+
+.hero-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border-color: #ffffff;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.28);
+}
+
+
+/* =========================================================
+   ABOUT MAHARASHTRA
+========================================================= */
+
+.about-maharashtra {
+    width: 100vw;
+
+    margin-left: calc(50% - 50vw);
+
+    padding: 70px 8%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 60px;
+
+    background: #f5f8f5;
+
+    border-radius: 25px;
+}
+
+
+/* LEFT CONTENT */
+
+.about-text {
+    flex: 1;
+
+    animation: revealLeft 0.9s ease both;
+}
+
+
+.about-tag {
+    color: #2e7d32;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.about-text h2 {
+    margin: 12px 0 20px;
+
+    font-size: 38px;
+
+    line-height: 1.2;
+
+    color: #222;
+
+    font-weight: 800;
+}
+
+
+.about-text h2 span {
+    color: #2e7d32;
+}
+
+
+.about-text p {
+    margin-bottom: 15px;
+
+    color: #555;
+
+    font-size: 16px;
+
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   HIGHLIGHT CARDS
+========================================================= */
+
+.about-highlights {
+    flex: 1;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+
+.highlight-card {
+    position: relative;
+
+    padding: 26px 20px 22px;
+
+    overflow: hidden;
+
+    text-align: center;
+
+    background: white;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+
+/* Animated top line */
+
+.highlight-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 0;
+    height: 4px;
+
+    background: #2e7d32;
+
+    transition: width 0.4s ease;
+}
+
+
+.highlight-card:hover::before {
+    width: 100%;
+}
+
+
+.highlight-card:hover {
+    transform: translateY(-8px);
+
+    box-shadow:
+        0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ICON */
+
+.highlight-card .icon {
+    width: 65px;
+    height: 65px;
+
+    margin: 0 auto 13px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e8f5e9;
+
+    font-size: 32px;
+
+    transition:
+        transform 0.4s ease;
+}
+
+
+.highlight-card:hover .icon {
+    transform:
+        translateY(-5px)
+        rotate(6deg)
+        scale(1.08);
+}
+
+
+.highlight-card h3 {
+    margin: 8px 0;
+
+    color: #2e7d32;
+
+    font-size: 19px;
+    font-weight: 700;
+}
+
+
+.highlight-card p {
+    margin: 0 0 12px;
+
+    color: #666;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+.highlight-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: auto;
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: #e8f5e9;
+    color: #2e7d32 !important;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid #c8e6c9;
+    transition: all 0.25s ease;
+}
+
+.highlight-btn:hover {
+    background: #2e7d32;
+    color: white !important;
+    border-color: #2e7d32;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    text-decoration: none;
+}
+
+.highlight-btn i {
+    transition: transform 0.25s ease;
+}
+
+.highlight-btn:hover i {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   SMART FEATURES
+========================================================= */
+
+.features-section {
+    width: 100vw;
+
+    margin-left: calc(50% - 50vw);
+
+    padding: 75px 8%;
+
+    background: white;
+}
+
+
+/* HEADING */
+
+.features-heading {
+    text-align: center;
+
+    max-width: 750px;
+
+    margin: 0 auto 50px;
+}
+
+
+.features-heading span {
+    color: #2e7d32;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.features-heading h2 {
+    margin: 12px 0;
+
+    color: #222;
+
+    font-size: 36px;
+
+    line-height: 1.3;
+
+    font-weight: 800;
+}
+
+
+.features-heading h2 b {
+    color: #2e7d32;
+}
+
+
+.features-heading p {
+    margin: 0;
+
+    color: #666;
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   FEATURE GRID
+========================================================= */
+
+.features-container {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 24px;
+
+    max-width: 1250px;
+
+    margin: auto;
+}
+
+
+/* FEATURE CARD */
+
+.feature-card {
+    position: relative;
+
+    padding: 30px 25px;
+
+    overflow: hidden;
+
+    text-align: center;
+
+    background: white;
+
+    border: 1px solid #edf0ed;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.07);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    transition:
+        transform 0.4s ease,
+        box-shadow 0.4s ease,
+        border-color 0.4s ease;
+}
+
+
+/* Animated glow */
+
+.feature-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 130px;
+    height: 130px;
+
+    border-radius: 50%;
+
+    background: #e8f5e9;
+
+    top: -70px;
+    right: -70px;
+
+    transition:
+        transform 0.5s ease;
+}
+
+
+.feature-card:hover::before {
+    transform: scale(2);
+}
+
+
+.feature-card:hover {
+    transform: translateY(-10px);
+
+    border-color: #cde8d5;
+
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ICON */
+
+.feature-icon {
+    position: relative;
+    z-index: 1;
+
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e8f5e9;
+
+    font-size: 34px;
+
+    transition:
+        transform 0.45s ease,
+        background 0.45s ease;
+}
+
+
+.feature-card:hover .feature-icon {
+    transform:
+        translateY(-6px)
+        rotate(-6deg)
+        scale(1.1);
+
+    background: #d9f0df;
+}
+
+
+/* FEATURE TITLE */
+
+.feature-card h3 {
+    position: relative;
+    z-index: 1;
+
+    margin-bottom: 12px;
+
+    color: #2e7d32;
+
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+
+/* FEATURE TEXT */
+
+.feature-card p {
+    position: relative;
+    z-index: 1;
+
+    margin: 0 0 16px;
+
+    min-height: 68px;
+
+    color: #666;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+}
+
+
+/* FEATURE BUTTON */
+
+.feature-card .feature-btn {
+    position: relative;
+    z-index: 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: auto;
+    padding: 10px 22px;
+
+    border-radius: 12px;
+
+    background: #e8f5e9;
+
+    color: #198754 !important;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    border: 1px solid #c8e6c9;
+
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+
+.feature-card .feature-btn:hover {
+    background: #198754;
+
+    color: white !important;
+
+    border-color: #198754;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 6px 18px rgba(25, 135, 84, 0.25);
+
+    text-decoration: none;
+}
+
+.feature-card .feature-btn i {
+    transition: transform 0.3s ease;
+}
+
+.feature-card .feature-btn:hover i {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   SCROLL REVEAL STYLE
+========================================================= */
+
+.about-maharashtra,
+.features-section {
+    animation:
+        sectionReveal 0.8s ease both;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes heroContent {
+    from {
+        opacity: 0;
+        transform: translateX(-35px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+@keyframes revealLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+@keyframes sectionReveal {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes heroCircle {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-40px, 30px) scale(1.15);
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE DESIGN
+========================================================= */
+
+@media (max-width: 1200px) {
+    .hero-content {
+        margin-left: 6%;
+    }
+
+    .hero-content h1 {
+        font-size: 42px;
+    }
+
+    .about-maharashtra {
+        padding-left: 6%;
+        padding-right: 6%;
+        gap: 40px;
+    }
+
+    .features-section {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+}
+
+
+@media (max-width: 900px) {
+    .hero {
+        min-height: 500px;
+    }
+
+    .hero-content {
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    .hero-content h1 {
+        font-size: 38px;
+    }
+
+    .hero-content p {
+        font-size: 19px;
+    }
+
+    .about-maharashtra {
+        flex-direction: column;
+        padding: 55px 5%;
+        gap: 40px;
+    }
+
+    .about-text {
+        width: 100%;
+        text-align: center;
+    }
+
+    .about-text h2 {
+        font-size: 34px;
+    }
+
+    .about-highlights {
+        width: 100%;
+    }
+
+    .features-section {
+        padding: 60px 5%;
+    }
+
+    .features-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+}
+
+
+@media (max-width: 600px) {
+    .hero {
+        min-height: 470px;
+        background-position: 62% center;
+    }
+
+    .hero::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .hero-content {
+        margin-left: 20px;
+        margin-right: 20px;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 31px;
+        line-height: 1.25;
+    }
+
+    .hero-content p {
+        font-size: 17px;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        justify-content: center;
+    }
+
+    .hero-btn {
+        padding: 13px 21px;
+        font-size: 15px;
+    }
+
+    .about-maharashtra {
+        padding: 50px 20px;
+        gap: 30px;
+        border-radius: 20px;
+    }
+
+    .about-text h2 {
+        font-size: 29px;
+    }
+
+    .about-text p {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .about-highlights {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .highlight-card {
+        padding: 24px 20px;
+    }
+
+    .features-section {
+        padding: 55px 20px;
+    }
+
+    .features-heading {
+        margin-bottom: 35px;
+    }
+
+    .features-heading h2 {
+        font-size: 29px;
+    }
+
+    .features-heading p {
+        font-size: 15px;
+    }
+
+    .features-container {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .feature-card {
+        padding: 28px 20px;
+    }
+
+    .feature-card p {
+        min-height: auto;
+    }
+}
+
+
+@media (max-width: 380px) {
+    .hero {
+        min-height: 450px;
+    }
+
+    .hero-content h1 {
+        font-size: 27px;
+    }
+
+    .hero-content p {
+        font-size: 16px;
+    }
+
+    .about-text h2 {
+        font-size: 26px;
+    }
+
+    .features-heading h2 {
+        font-size: 26px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+</style>
+
+
+<!-- =========================================================
+     HERO SECTION
+========================================================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>
+            Explore Maharashtra's
+            Eco & Cultural Heritage
+        </h1>
+
+        <p>
+            Discover historic forts, serene beaches, misty hills,
+            <br>
+            and unforgettable travel experiences.
+        </p>
+
+        <div class="hero-actions">
+            <a
+                href="/explore"
+                class="hero-btn"
+            >
+                Explore Destinations
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+            <a
+                href="/planner"
+                class="hero-btn hero-btn-secondary"
+            >
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                AI Trip Planner
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     ABOUT MAHARASHTRA
+========================================================= -->
+
+<section class="about-maharashtra">
+
+    <div class="about-text">
+
+        <span class="about-tag">
+            ✨ DISCOVER MAHARASHTRA
+        </span>
+
+        <h2>
+            A Land of
+            <span>
+                Culture, Heritage & Adventure
+            </span>
+        </h2>
+
+        <p>
+            Maharashtra is a land where history meets nature and tradition meets adventure. From
+            the majestic Sahyadri mountains and magnificent forts to ancient caves, peaceful
+            beaches and vibrant culture, every destination has a story to tell.
+        </p>
+
+        <p>
+            Explore Maharashtra, discover its hidden gems, experience its rich heritage and create
+            unforgettable travel memories.
+        </p>
+
+    </div>
+
+
+    <div class="about-highlights">
+
+        <!-- FORTS -->
+        <div class="highlight-card">
+            <div class="icon">
+                🏰
+            </div>
+            <h3>
+                Historic Forts
+            </h3>
+            <p>
+                Discover the legendary hill citadels and legacy of the Maratha Empire.
+            </p>
+            <a href="/explore?category=Historical" class="highlight-btn">
+                Explore Forts
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- NATURE -->
+        <div class="highlight-card">
+            <div class="icon">
+                🌿
+            </div>
+            <h3>
+                Natural Beauty
+            </h3>
+            <p>
+                Experience misty Sahyadri hills, waterfalls, and lush scenic valleys.
+            </p>
+            <a href="/explore?category=Nature" class="highlight-btn">
+                Explore Nature
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- BEACH -->
+        <div class="highlight-card">
+            <div class="icon">
+                🏖️
+            </div>
+            <h3>
+                Pristine Beaches
+            </h3>
+            <p>
+                Relax along the golden sands and calm waves of the Konkan coastline.
+            </p>
+            <a href="/explore?category=Beach" class="highlight-btn">
+                Explore Beaches
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- CULTURE -->
+        <div class="highlight-card">
+            <div class="icon">
+                🛕
+            </div>
+            <h3>
+                Rich Culture
+            </h3>
+            <p>
+                Experience ancient cave temples, colorful festivals, and traditions.
+            </p>
+            <a href="/explore?category=Religious" class="highlight-btn">
+                Explore Culture
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     SMART TRAVEL FEATURES
+========================================================= -->
+
+<section class="features-section">
+
+    <div class="features-heading">
+
+        <span>
+            ✨ SMART TRAVEL EXPERIENCE
+        </span>
+
+        <h2>
+            Everything You Need to
+            <b>
+                Explore Maharashtra
+            </b>
+        </h2>
+
+        <p>
+            Discover, plan and experience Maharashtra with smart technology, intelligent itinerary tools and trusted travel services.
+        </p>
+
+    </div>
+
+
+    <div class="features-container">
+
+        <!-- =================================================
+             1. AI TRAVEL PLANNER
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🤖
+            </div>
+            <h3>
+                AI Travel Planner
+            </h3>
+            <p>
+                Generate personalized day-by-day travel itineraries based on your budget, interests, and dates powered by Gemini AI.
+            </p>
+            <a href="/planner" class="feature-btn">
+                Plan with AI
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+
+        <!-- =================================================
+             2. MANUAL TRIP PLANNER
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🗺️
+            </div>
+            <h3>
+                Manual Trip Planner
+            </h3>
+            <p>
+                Handpick favorite destinations across Maharashtra, organize custom stops, and build your personalized trip step by step.
+            </p>
+            <a href="/m-planner" class="feature-btn">
+                Build Custom Trip
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+
+        <!-- =================================================
+             3. EXPLORE DESTINATIONS
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🧭
+            </div>
+            <h3>
+                Explore Destinations
+            </h3>
+            <p>
+                Browse ancient forts, scenic hill stations, beaches, caves, wildlife parks, and heritage landmarks across Maharashtra.
+            </p>
+            <a href="/explore" class="feature-btn">
+                Explore Places
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+
+        <!-- =================================================
+             4. TOURIST SAFETY & GEOFENCING
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🛡️
+            </div>
+            <h3>
+                Tourist Safety & Alerts
+            </h3>
+            <p>
+                Stay protected with real-time geo-fencing warnings, high-risk safety zones, safe route navigation, and instant SOS alerts.
+            </p>
+            <a href="/safety" class="feature-btn">
+                Safety Dashboard
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+
+        <!-- =================================================
+             5. MY TRIPS & COMPANION
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🧳
+            </div>
+            <h3>
+                My Trips & Companion
+            </h3>
+            <p>
+                Track your active journeys, access saved itineraries, monitor live weather, and check off checkpoints during travels.
+            </p>
+            <a href="/my-trips" class="feature-btn">
+                View My Trips
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+
+        <!-- =================================================
+             6. HOTEL & RESORT BOOKING
+        ================================================== -->
+        <div class="feature-card">
+            <div class="feature-icon">
+                🏨
+            </div>
+            <h3>
+                Hotels & Stays Booking
+            </h3>
+            <p>
+                Book official Maharashtra Tourism (MTDC) resorts, verified heritage stays, and travel accommodations with ease.
+            </p>
+            <a href="/booking" target="_blank" rel="noopener noreferrer" class="feature-btn">
+                Book Stays
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+
+    </div>
+
+</section>

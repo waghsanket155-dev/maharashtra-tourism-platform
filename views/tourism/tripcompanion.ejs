@@ -1,0 +1,2058 @@
+<% layout("layout/boilerplate") %>
+
+<!-- Leaflet CSS & JS for map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root {
+    --tc-green: #198754;
+    --tc-dark: #123c2b;
+    --tc-blue: #0d6efd;
+    --tc-amber: #ffc107;
+    --tc-red: #dc3545;
+    --tc-light: #f7fcf9;
+    --tc-card-shadow: 0 8px 30px rgba(18,60,43,0.08);
+  }
+
+  .tc-page { background: var(--tc-light); min-height: 100vh; padding: 30px 0 80px; }
+
+  /* Header */
+  .tc-hero {
+    background: linear-gradient(135deg, #123c2b 0%, #198754 60%, #0d6efd 100%);
+    color: white; border-radius: 22px; padding: 28px 28px 24px;
+    margin-bottom: 24px; position: relative; overflow: hidden;
+    box-shadow: 0 12px 35px rgba(25,135,84,0.22);
+  }
+  .tc-hero::after {
+    content: "🗺️"; position: absolute; right: 20px; bottom: -10px;
+    font-size: 90px; opacity: 0.12; pointer-events: none;
+  }
+  .tc-hero h1 { font-size: clamp(22px,3.5vw,32px); font-weight: 850; margin-bottom: 6px; }
+  .tc-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .tc-meta-pill {
+    background: rgba(255,255,255,0.18); backdrop-filter: blur(8px);
+    border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 700;
+  }
+
+  /* Status Banner */
+  .tc-status-bar {
+    background: white; border-radius: 16px; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    box-shadow: var(--tc-card-shadow); border-left: 5px solid var(--tc-green);
+    flex-wrap: wrap;
+  }
+
+  /* Main 2-col grid */
+  .tc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:900px){ .tc-grid { grid-template-columns: 1fr; } }
+
+  /* Cards */
+  .tc-card {
+    background: white; border-radius: 18px; box-shadow: var(--tc-card-shadow);
+    border: 1px solid rgba(25,135,84,0.1); margin-bottom: 20px; overflow: hidden;
+  }
+  .tc-card-header {
+    padding: 14px 18px 10px; border-bottom: 1px solid #eef2ee;
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 0.95rem; color: var(--tc-dark);
+  }
+  .tc-card-header i { color: var(--tc-green); }
+  .tc-card-body { padding: 16px 18px; }
+
+  /* Travel Mode Selector */
+  .travel-mode-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    border: 1px solid rgba(25,135,84,0.15);
+    margin-bottom: 14px;
+  }
+  .travel-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .mode-btn {
+    padding: 10px 6px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .mode-btn:hover {
+    background: #f1f8f4;
+    border-color: #a7f3d0;
+    color: #15803d;
+    transform: translateY(-2px);
+  }
+  .mode-btn.active.mode-bike {
+    background: #ea580c;
+    border-color: #c2410c;
+    color: white;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+  }
+  .mode-btn.active.mode-train {
+    background: #4f46e5;
+    border-color: #4338ca;
+    color: white;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  }
+  .mode-btn.active.mode-car {
+    background: #0284c7;
+    border-color: #0369a1;
+    color: white;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  }
+  .mode-btn.active.mode-walk {
+    background: #16a34a;
+    border-color: #15803d;
+    color: white;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+  }
+
+  /* Route Info & Recommendation */
+  .route-summary-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 14px 16px;
+    margin-top: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  }
+  .route-metric-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+  .route-metric-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+  }
+  .route-metric-val {
+    font-size: 1.15rem;
+    font-weight: 850;
+    color: #0f172a;
+    margin-top: 2px;
+  }
+  .route-advice-box {
+    background: #f8fafc;
+    border-left: 4px solid var(--tc-green);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .btn-gmaps-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    background: linear-gradient(135deg, #1a73e8, #0d5db8);
+    color: white !important;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(26,115,232,0.25);
+    transition: all 0.2s ease;
+  }
+  .btn-gmaps-nav:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(26,115,232,0.35);
+    text-decoration: none;
+  }
+
+  /* Map */
+  #tripMap { height: 380px; border-radius: 14px; width: 100%; }
+
+  /* Progress bar */
+  .tc-progress-bar { background: #e9ecef; border-radius: 10px; height: 10px; overflow: hidden; }
+  .tc-progress-fill { height: 100%; background: linear-gradient(90deg, var(--tc-green), var(--tc-blue)); border-radius: 10px; transition: width 0.5s ease; }
+
+  /* Destination cards */
+  .dest-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid #f0f5f0;
+  }
+  .dest-item:last-child { border-bottom: none; }
+  .dest-num {
+    width: 30px; height: 30px; border-radius: 50%; background: #e8f6ef;
+    color: var(--tc-green); font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dest-num.active { background: var(--tc-blue); color: white; }
+  .dest-num.done { background: var(--tc-green); color: white; }
+  .dest-name { font-weight: 700; color: #183c2c; font-size: 14px; margin-bottom: 2px; }
+  .dest-meta { font-size: 12px; color: #6c757d; }
+  .dest-coords { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .dest-no-coords { font-size: 11px; color: #e65100; background:#fff3e0; padding:2px 8px; border-radius:10px; display:inline-block; }
+  .dest-actions { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .dest-actions a, .dest-actions button {
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 8px;
+    text-decoration: none; border: none; cursor: pointer;
+  }
+  .btn-nav-link { background: #e8f0fe; color: #1a73e8; }
+  .btn-nav-link:hover { background: #1a73e8; color: white; }
+  .btn-mark-done { background: #e8f6ef; color: var(--tc-green); }
+  .btn-mark-done:hover { background: var(--tc-green); color: white; }
+  .btn-mark-done:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Weather card */
+  .weather-card {
+    border-radius: 14px; padding: 14px; border: 1px solid rgba(25,135,84,0.15);
+    margin-bottom: 10px; background: linear-gradient(135deg,#f7fcf9,#edf7f2);
+  }
+  .weather-temp { font-size: 2.2rem; font-weight: 900; color: var(--tc-dark); }
+  .weather-icon { font-size: 2.5rem; }
+  .weather-detail { font-size: 12px; color: #555; }
+  .weather-loading { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
+  .weather-error { text-align: center; color: var(--tc-red); padding: 15px; font-size: 13px; }
+
+  /* Safety panel */
+  .safety-status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  }
+  .pill-inactive { background: #f0f0f0; color: #666; }
+  .pill-active { background: #e8f6ef; color: var(--tc-green); border: 1px solid #b8e6cf; }
+  .gps-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .gps-dot.active { background: var(--tc-green); animation: pulse-dot 1.5s infinite; }
+  .gps-dot.inactive { background: #aaa; }
+  @keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 0 rgba(25,135,84,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(25,135,84,0); }
+    100% { box-shadow: 0 0 0 0 rgba(25,135,84,0); }
+  }
+
+  /* Geofence alert */
+  .gf-alert {
+    border-radius: 12px; padding: 10px 14px; margin-bottom: 8px;
+    font-size: 13px; display: flex; justify-content: space-between; align-items: flex-start;
+    border-left: 4px solid;
+  }
+  .gf-enter { background:#e8f6ef; border-color: var(--tc-green); color:#126b47; }
+  .gf-caution { background:#fff8e6; border-color: var(--tc-amber); color:#856404; }
+  .gf-restricted { background:#fff0f1; border-color: var(--tc-red); color:#721c24; }
+  .gf-exit { background:#f8f9fa; border-color:#aaa; color:#555; }
+
+  /* SOS button */
+  .sos-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px; border-radius: 14px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white; font-size: 15px; font-weight: 800;
+    border: none; cursor: pointer; box-shadow: 0 6px 18px rgba(220,53,69,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .sos-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(220,53,69,0.4); }
+
+  /* Itinerary timeline */
+  .day-block { margin-bottom: 18px; }
+  .day-header {
+    background: linear-gradient(90deg, #e8f6ef, #f0f7fc);
+    border-radius: 12px; padding: 10px 16px; font-weight: 800;
+    color: var(--tc-dark); margin-bottom: 10px; border-left: 4px solid var(--tc-green);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .act-row {
+    display: flex; gap: 10px; margin-bottom: 8px; padding: 10px 12px;
+    border-radius: 12px; border: 1px solid #eef2ee;
+    background: white; transition: background 0.2s;
+  }
+  .act-row.done-act { background: #f0faf4; border-color: #b8e6cf; opacity: 0.8; }
+  .act-row.current-act { border-color: var(--tc-blue); background: #f0f4ff; }
+  .act-time { font-size: 11px; color: #888; min-width: 60px; padding-top: 2px; }
+  .act-main { flex: 1; }
+  .act-place { font-weight: 700; font-size: 14px; color: #183c2c; margin-bottom: 2px; }
+  .act-detail { font-size: 11px; color: #6c757d; }
+  .act-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+    display: inline-block; margin-left: 4px;
+  }
+  .badge-visit { background: #e8f6ef; color: var(--tc-green); }
+  .badge-travel { background: #e8f0fe; color: var(--tc-blue); }
+  .badge-meal { background: #fff8e6; color: #856404; }
+
+  /* Action footer */
+  .tc-footer {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;
+    padding: 18px; background: white; border-radius: 16px;
+    box-shadow: var(--tc-card-shadow);
+  }
+  .tc-footer a, .tc-footer button {
+    flex: 1; min-width: 120px; padding: 12px 16px; border-radius: 12px;
+    font-weight: 700; font-size: 14px; text-align: center;
+    text-decoration: none; border: none; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 7px;
+  }
+  .btn-pause { background: #fff8e6; color: #856404; border: 1px solid #ffc107; }
+  .btn-pause:hover { background: #ffc107; color: white; }
+  .btn-complete { background: linear-gradient(135deg, var(--tc-green), #157347); color: white; box-shadow: 0 4px 14px rgba(25,135,84,0.25); }
+  .btn-complete:hover { transform: translateY(-2px); }
+  .btn-back { background: #f5f5f5; color: #555; }
+  .btn-back:hover { background: #e8e8e8; }
+
+  /* Destination weather tabs */
+  .dest-weather-tab {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    cursor: pointer; border: 1px solid #ddd; margin: 4px; background: white;
+    transition: all 0.2s;
+  }
+  .dest-weather-tab.active { background: var(--tc-green); color: white; border-color: var(--tc-green); }
+
+  /* Nav controls */
+  .nav-controls { display: flex; gap: 8px; margin-top: 10px; }
+  .nav-btn {
+    flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #ddd;
+    background: white; font-weight: 700; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--tc-green); color: white; border-color: var(--tc-green); }
+  .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Consent explanation box */
+  .consent-box {
+    background: #f0f7fc; border-radius: 14px; padding: 14px 16px;
+    border: 1px solid #c2d7fa; margin-bottom: 14px;
+  }
+  .consent-box h6 { font-weight: 800; color: #0d6efd; margin-bottom: 6px; }
+  .consent-box p { font-size: 12px; color: #555; margin: 0; }
+
+  /* SOS Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 9999; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 20px; padding: 24px;
+    width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-box h5 { font-weight: 850; margin-bottom: 16px; }
+  .modal-box label { font-weight: 700; font-size: 13px; display: block; margin-bottom: 4px; }
+  .modal-box select, .modal-box textarea, .modal-box input {
+    width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 10px 12px;
+    font-size: 13px; margin-bottom: 12px; outline: none;
+  }
+  .modal-box select:focus, .modal-box textarea:focus { border-color: var(--tc-green); }
+  .modal-consent { background: #f8f8f8; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; }
+  .modal-warning { background: #fff5f5; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: #c62828; border-left: 3px solid var(--tc-red); }
+  .modal-footer-btns { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-footer-btns button { flex: 1; padding: 11px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; font-size: 14px; }
+  .btn-sos-submit { background: linear-gradient(135deg,var(--tc-red),#c82333); color: white; }
+  .btn-sos-cancel { background: #f0f0f0; color: #555; }
+  .sos-result { background: #e8f6ef; border-radius: 10px; padding: 14px; margin-top: 12px; display: none; }
+
+  @media(max-width:576px){
+    .tc-hero { padding: 20px 16px; }
+    .tc-card-body, .tc-card-header { padding: 12px 14px; }
+    .tc-footer a, .tc-footer button { min-width: 100px; font-size: 12px; padding: 10px; }
+  }
+</style>
+
+<% 
+  const tripId = trip._id.toString();
+  const tripName = trip.tripName || trip.title || 'Maharashtra Trip';
+  const startingCity = trip.startingCity || 'Maharashtra';
+  const daysCount = trip.days ? trip.days.length : 0;
+  const tripStatus = trip.tripStatus || 'not_started';
+  
+  // Flatten all activities into a sequential stop list
+  const allStops = [];
+  let stopIndex = 0;
+  (trip.days || []).forEach((day, dayIdx) => {
+    (day.activities || []).forEach((act, actIdx) => {
+      if (act.place || act.placeId) {
+        const placeIdStr = act.placeId ? act.placeId.toString() : null;
+        const destInfo = placeIdStr ? (destinationMap[placeIdStr] || destinationMap[act.place?.toLowerCase()?.trim()] || null) : (destinationMap[act.place?.toLowerCase()?.trim()] || null);
+        allStops.push({
+          stopIndex: stopIndex++,
+          dayIndex: dayIdx,
+          activityIndex: actIdx,
+          activityId: act._id ? act._id.toString() : null,
+          dayLabel: `Day ${day.day || (dayIdx+1)}`,
+          dayTitle: day.title || '',
+          dayDate: day.date || '',
+          place: act.place || (destInfo ? destInfo.name : 'Stop'),
+          placeId: placeIdStr,
+          type: act.type || 'visit',
+          arrivalTime: act.arrivalTime || act.time || '',
+          departureTime: act.departureTime || '',
+          duration: act.duration || '',
+          transportMode: act.transportMode || '',
+          notes: act.notes || act.description || '',
+          destInfo: destInfo
+        });
+      }
+    });
+  });
+  
+  const currentDayIdx = trip.tripProgress ? (trip.tripProgress.currentDayIndex || 0) : 0;
+  const currentActIdx = trip.tripProgress ? (trip.tripProgress.currentActivityIndex || 0) : 0;
+  const completedIds = trip.tripProgress ? (trip.tripProgress.completedActivityIds || []).map(id => id.toString()) : [];
+%>
+
+<div class="tc-page">
+<div class="container-fluid" style="max-width:1200px;">
+
+  <!-- HERO HEADER -->
+  <div class="tc-hero">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+      <div>
+        <h1>🧭 <%= tripName %></h1>
+        <div class="tc-hero-meta">
+          <span class="tc-meta-pill"><i class="fa-solid fa-location-dot me-1"></i><%= startingCity %></span>
+          <span class="tc-meta-pill"><i class="fa-regular fa-calendar me-1"></i><%= daysCount %> Day<%= daysCount !== 1 ? 's' : '' %></span>
+          <span class="tc-meta-pill"><i class="fa-solid fa-map-pin me-1"></i><%= allStops.length %> Stop<%= allStops.length !== 1 ? 's' : '' %></span>
+          <% if (trip.travelers) { %><span class="tc-meta-pill"><i class="fa-solid fa-user-group me-1"></i><%= trip.travelers %> Traveler<%= trip.travelers !== 1 ? 's' : '' %></span><% } %>
+          <% if (trip.startDate) { %><span class="tc-meta-pill"><i class="fa-regular fa-clock me-1"></i><%= trip.startDate %></span><% } %>
+        </div>
+      </div>
+      <a href="/my-trips" class="btn btn-light btn-sm fw-bold rounded-pill px-3 mt-2" style="white-space:nowrap;">
+        <i class="fa-solid fa-arrow-left me-1"></i> My Trips
+      </a>
+    </div>
+  </div>
+
+  <!-- PROGRESS STATUS BAR -->
+  <div class="tc-status-bar">
+    <div id="tripStatusIcon" style="font-size:1.5rem;">🚀</div>
+    <div style="flex:1;">
+      <div style="font-weight:800; color:#183c2c; margin-bottom:4px;">
+        Trip in Progress — <span id="progressLabel"><%= currentDayIdx + 1 %>/<%= daysCount %> days</span>
+      </div>
+      <div class="tc-progress-bar">
+        <div class="tc-progress-fill" id="mainProgressFill" style="width: <%= daysCount > 0 ? Math.round(((currentDayIdx) / daysCount) * 100) : 0 %>%;"></div>
+      </div>
+    </div>
+    <span id="tripStatusText" style="font-size:12px; font-weight:700; color:#198754;">Active</span>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="tc-grid">
+
+    <!-- LEFT COLUMN: Navigation + Map + Stops -->
+    <div>
+
+      <!-- CURRENT DESTINATION & NAVIGATION -->
+      <div class="tc-card">
+        <div class="tc-card-header">
+          <i class="fa-solid fa-route"></i> Navigation — Next Destination
+        </div>
+        <div class="tc-card-body">
+          <div id="currentDestDisplay">
+            <% if (allStops.length > 0) { 
+                const firstStop = allStops[0];
+            %>
+              <div style="font-size:1.1rem; font-weight:800; color:#183c2c; margin-bottom:4px;">
+                📍 <span id="currentDestName"><%= firstStop.place %></span>
+              </div>
+              <div style="font-size:12px; color:#6c757d;" id="currentDestMeta">
+                <%= firstStop.dayLabel %> · <%= firstStop.type %><% if(firstStop.arrivalTime){%> · <%= firstStop.arrivalTime %><% } %>
+              </div>
+            <% } else { %>
+              <div style="color:#888; font-size:13px;">No destinations in this itinerary.</div>
+            <% } %>
+          </div>
+
+          <!-- GPS Location Status -->
+          <div style="margin-top:12px; padding:10px 12px; background:#f8f9fa; border-radius:12px; font-size:12px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong style="color:#183c2c;">📡 Your Location</strong>
+              <span id="gpsBadge" class="safety-status-pill pill-inactive">
+                <span class="gps-dot inactive" id="gpsDot"></span> GPS Off
+              </span>
+            </div>
+            <div id="gpsCoords" style="color:#888; margin-bottom:6px;">Location not enabled</div>
+            <div id="gpsAccuracy" style="color:#aaa; font-size:11px;"></div>
+          </div>
+
+          <!-- Location enable prompt -->
+          <div class="consent-box mt-3" id="locationConsentBox">
+            <h6><i class="fa-solid fa-location-crosshairs me-1"></i> Enable Location for Navigation</h6>
+            <p>Your device location helps calculate distances to each destination and show your position on the map. Your coordinates are only used locally in your browser and are <strong>never continuously saved</strong>.</p>
+          </div>
+          
+          <div class="nav-controls">
+            <button class="nav-btn" id="enableLocationBtn" onclick="requestLocationPermission()">
+              <i class="fa-solid fa-location-crosshairs"></i> Enable Location
+            </button>
+            <button class="nav-btn" id="disableLocationBtn" onclick="stopLocationTracking()" style="display:none;">
+              <i class="fa-solid fa-xmark"></i> Stop GPS
+            </button>
+          </div>
+
+          <!-- TRAVEL MODE SELECTION (Bike / Train / Car / Walk) -->
+          <div class="travel-mode-card mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span style="font-size:12px; font-weight:800; color:#183c2c;">
+                <i class="fa-solid fa-route me-1 text-success"></i> Travel Mode
+              </span>
+              <span class="badge bg-light text-success border" id="activeModeLabel" style="font-size:11px; font-weight:700;">
+                🏍️ Bike Selected
+              </span>
+            </div>
+            <div class="travel-mode-tabs">
+              <button type="button" class="mode-btn mode-bike active" id="modeBtn-bike" onclick="setTravelMode('bike')">
+                <i class="fa-solid fa-motorcycle" style="font-size:1.15rem;"></i>
+                <span>Bike</span>
+              </button>
+              <button type="button" class="mode-btn mode-train" id="modeBtn-train" onclick="setTravelMode('train')">
+                <i class="fa-solid fa-train" style="font-size:1.15rem;"></i>
+                <span>Train</span>
+              </button>
+              <button type="button" class="mode-btn mode-car" id="modeBtn-car" onclick="setTravelMode('car')">
+                <i class="fa-solid fa-car" style="font-size:1.15rem;"></i>
+                <span>Car</span>
+              </button>
+              <button type="button" class="mode-btn mode-walk" id="modeBtn-walk" onclick="setTravelMode('walk')">
+                <i class="fa-solid fa-person-walking" style="font-size:1.15rem;"></i>
+                <span>Walk</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ROUTE GUIDANCE & BEST ROUTE PANEL -->
+          <div id="routeSummaryPanel" class="route-summary-panel">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+              <span class="badge bg-success text-white px-2 py-1 rounded-pill" id="routeModeBadge" style="font-size:0.75rem;">
+                <i class="fa-solid fa-motorcycle me-1"></i> Bike Route
+              </span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill" style="font-size:0.75rem; font-weight:700;">
+                <i class="fa-solid fa-circle-check me-1"></i> Recommended Best Route
+              </span>
+            </div>
+
+            <div class="row g-2 text-center my-1">
+              <div class="col-6">
+                <div class="route-metric-pill">
+                  <div class="route-metric-label">🛣️ Road Distance</div>
+                  <div class="route-metric-val" id="routeDistanceText">Calculating...</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="route-metric-pill">
+                  <div class="route-metric-label">⏱️ Estimated Time (ETA)</div>
+                  <div class="route-metric-val text-success" id="routeDurationText">--</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Route Advice Box -->
+            <div class="route-advice-box" id="routeAdviceBox">
+              <div class="fw-bold text-dark mb-1" id="routeAdviceTitle">
+                <i class="fa-solid fa-compass text-primary me-1"></i> Route Directions:
+              </div>
+              <div id="routeAdviceText" class="text-secondary small">
+                Loading route directions and turns...
+              </div>
+            </div>
+
+            <!-- Train Details (shown only when Train is selected) -->
+            <div id="trainDetailsBox" style="display:none;" class="p-3 rounded-3 bg-warning-subtle border border-warning mt-2 small">
+              <div class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-train text-danger me-1"></i> Railway Route & Station Details:
+              </div>
+              <div id="trainStationsText" class="text-dark"></div>
+              <div class="d-flex gap-2 mt-2">
+                <a href="https://www.irctc.co.in" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-dark flex-fill" style="font-size:11px; font-weight:700;">
+                  <i class="fa-solid fa-ticket me-1"></i> IRCTC Train Booking
+                </a>
+                <a href="https://enquiry.indianrail.gov.in" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark flex-fill" style="font-size:11px; font-weight:700;">
+                  <i class="fa-solid fa-clock me-1"></i> Live Train Status
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Google Maps Navigation Button -->
+          <div id="mapsLinkContainer" style="margin-top:12px;">
+            <a id="mapsNavLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-gmaps-nav">
+              <i class="fa-solid fa-location-arrow"></i>
+              <span id="mapsNavLabel">Start Bike Navigation in Google Maps</span>
+            </a>
+          </div>
+
+          <!-- Previous / Next stop controls -->
+          <div class="nav-controls mt-3">
+            <button class="nav-btn" id="prevStopBtn" onclick="goToStop(currentStopIdx - 1)" disabled>
+              <i class="fa-solid fa-chevron-left"></i> Previous
+            </button>
+            <button class="nav-btn" id="nextStopBtn" onclick="goToStop(currentStopIdx + 1)">
+              Next <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+          
+          <!-- Mark Arrived -->
+          <button id="markArrivedBtn" class="btn btn-success w-100 mt-3 fw-bold rounded-pill" onclick="markCurrentArrived()">
+            <i class="fa-solid fa-check-circle me-1"></i> Confirm Arrival at This Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="tc-card">
+        <div class="tc-card-header d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-map-location-dot"></i> Live Route Map</span>
+          <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px; font-weight:700;" onclick="fitRouteBounds()">
+            <i class="fa-solid fa-expand me-1"></i> Fit Full Route
+          </button>
+        </div>
+        <div class="tc-card-body" style="padding:12px;">
+          <div id="tripMap"></div>
+          <div style="font-size:11px; color:#666; margin-top:8px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; text-align:center;">
+            <span><span style="color:#0d6efd; font-weight:bold;">●</span> Start / Current Location</span>
+            <span><span style="color:#dc3545; font-weight:bold;">📍</span> Active Stop</span>
+            <span><span id="routeLegendLine" style="font-weight:bold; color:#ea580c;">━━━</span> <span id="routeLegendText">Bike Route</span></span>
+            <span><span style="color:#198754; font-weight:bold;">●</span> Other Stops</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALL STOPS LIST -->
+      <div class="tc-card">
+        <div class="tc-card-header">
+          <i class="fa-solid fa-list-check"></i> All Stops (<%= allStops.length %>)
+        </div>
+        <div class="tc-card-body" id="allStopsContainer">
+          <% if (allStops.length === 0) { %>
+            <div style="text-align:center; color:#aaa; padding:20px;">
+              <i class="fa-solid fa-map-location-dot" style="font-size:2rem; margin-bottom:8px;"></i><br>
+              No destinations added to this itinerary yet.
+            </div>
+          <% } else { %>
+            <% allStops.forEach((stop, si) => { %>
+              <div class="dest-item" id="stop-item-<%= si %>">
+                <div class="dest-num <%= completedIds.includes(stop.activityId) ? 'done' : (si === 0 ? 'active' : '') %>" id="stop-num-<%= si %>">
+                  <%= completedIds.includes(stop.activityId) ? '✓' : (si + 1) %>
+                </div>
+                <div style="flex:1;">
+                  <div class="dest-name"><%= stop.place %></div>
+                  <div class="dest-meta">
+                    <%= stop.dayLabel %><% if(stop.dayDate){%> · <%= stop.dayDate %><% } %>
+                    <% if(stop.arrivalTime){%> · Arrival: <%= stop.arrivalTime %><% } %>
+                    <% if(stop.transportMode){%> · <i class="fa-solid fa-bus"></i> <%= stop.transportMode %><% } %>
+                  </div>
+                  <% if (stop.destInfo) { %>
+                    <% if (stop.destInfo.latitude && stop.destInfo.longitude) { %>
+                      <div class="dest-coords">📍 <%= stop.destInfo.latitude.toFixed(4) %>°N, <%= stop.destInfo.longitude.toFixed(4) %>°E</div>
+                    <% } else { %>
+                      <span class="dest-no-coords">No GPS coordinates in database</span>
+                    <% } %>
+                  <% } %>
+                  <div class="dest-actions">
+                    <% if (stop.destInfo && stop.destInfo.latitude && stop.destInfo.longitude) { %>
+                      <a href="https://www.google.com/maps/search/?api=1&query=<%= stop.destInfo.latitude %>,<%= stop.destInfo.longitude %>" 
+                         target="_blank" rel="noopener noreferrer" class="btn-nav-link">
+                        <i class="fa-brands fa-google me-1"></i>Maps
+                      </a>
+                      <button class="btn-mark-done" onclick="goToStop(<%= si %>)">
+                        <i class="fa-solid fa-location-crosshairs me-1"></i>Navigate Here
+                      </button>
+                    <% } %>
+                    <% if (!completedIds.includes(stop.activityId)) { %>
+                      <button class="btn-mark-done" id="done-btn-<%= si %>" 
+                              onclick="markStopDone(<%= si %>, '<%= stop.activityId %>')">
+                        <i class="fa-solid fa-check me-1"></i>Mark Done
+                      </button>
+                    <% } else { %>
+                      <span style="font-size:11px; color:var(--tc-green); font-weight:700;">✅ Visited</span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+    </div><!-- End Left Col -->
+
+    <!-- RIGHT COLUMN: Weather + Safety + Itinerary -->
+    <div>
+
+      <!-- WEATHER SECTION -->
+      <div class="tc-card">
+        <div class="tc-card-header">
+          <i class="fa-solid fa-cloud-sun"></i> Weather Information
+        </div>
+        <div class="tc-card-body">
+          <div style="margin-bottom:10px;">
+            <!-- Destination tabs -->
+            <div style="font-size:12px; color:#888; margin-bottom:8px;">Select a destination for its weather forecast:</div>
+            <div id="weatherTabsContainer">
+              <button class="dest-weather-tab active" onclick="loadWeatherForStop(0, this)">
+                📍 Current Location
+              </button>
+              <% allStops.slice(0,4).forEach((stop, wi) => { %>
+                <% if (stop.destInfo && stop.destInfo.latitude && stop.destInfo.longitude) { %>
+                  <button class="dest-weather-tab" onclick="loadWeatherForStop(<%= wi + 1 %>, this)" 
+                          data-lat="<%= stop.destInfo.latitude %>" data-lon="<%= stop.destInfo.longitude %>"
+                          data-name="<%= stop.place %>">
+                    Stop <%= wi + 1 %>: <%= stop.place.substring(0,12) %><%= stop.place.length > 12 ? '…' : '' %>
+                  </button>
+                <% } %>
+              <% }); %>
+            </div>
+          </div>
+          <div id="weatherDisplay">
+            <div class="weather-loading">
+              <i class="fa-solid fa-spinner fa-spin me-1"></i> 
+              Enable location to see current weather, or select a destination above.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOURIST SAFETY MONITORING -->
+      <div class="tc-card">
+        <div class="tc-card-header">
+          <i class="fa-solid fa-shield-halved"></i> Tourist Safety Monitoring
+        </div>
+        <div class="tc-card-body">
+
+          <div class="consent-box mb-3">
+            <h6><i class="fa-solid fa-info-circle me-1"></i> About GPS Monitoring</h6>
+            <p>Monitoring uses <code>watchPosition()</code> to check if you enter configured safety zones. Coordinates are processed <strong>locally in your browser only</strong> — not continuously saved to the server. Monitoring stops when you click Stop, leave this page, or close the tab.</p>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div style="font-weight:700; font-size:13px; color:#183c2c; margin-bottom:4px;">Geo-Fence Monitoring</div>
+              <div id="monitoringStatusBadge" class="safety-status-pill pill-inactive">
+                <span class="gps-dot inactive" id="monDot"></span> Inactive
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-success btn-sm fw-bold rounded-pill" id="startMonitoringBtn" onclick="startSafetyMonitoring()">
+                <i class="fa-solid fa-play me-1"></i> Start
+              </button>
+              <button class="btn btn-outline-danger btn-sm fw-bold rounded-pill" id="stopMonitoringBtn" onclick="stopSafetyMonitoring()" disabled>
+                <i class="fa-solid fa-stop me-1"></i> Stop
+              </button>
+            </div>
+          </div>
+
+          <div id="gpsStatusLine" style="font-size:11px; color:#aaa; margin-bottom:12px;"></div>
+
+          <!-- Geofence Alerts -->
+          <div style="font-weight:700; font-size:12px; color:#555; margin-bottom:8px;">
+            <i class="fa-solid fa-bell me-1"></i> Zone Alerts (this session)
+          </div>
+          <div id="gfAlertLog" style="max-height:160px; overflow-y:auto;">
+            <div style="text-align:center; color:#bbb; font-size:12px; padding:15px;" id="gfEmptyState">
+              No zone alerts yet. Start monitoring to detect nearby zones.
+            </div>
+          </div>
+
+          <hr style="border-color:#eee; margin:14px 0;">
+
+          <!-- SOS Button -->
+          <button class="sos-btn" onclick="openSOSModal()">
+            <i class="fa-solid fa-triangle-exclamation"></i> Report Emergency / SOS
+          </button>
+          <div style="font-size:11px; color:#888; text-align:center; margin-top:8px;">
+            For immediate danger, call <a href="tel:112" style="font-weight:800; color:var(--tc-red);">112</a> directly.
+          </div>
+
+          <!-- Emergency helplines -->
+          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+            <a href="tel:112" style="background:#fff0f1; color:#dc3545; padding:6px 12px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">🆘 112</a>
+            <a href="tel:100" style="background:#fff0f1; color:#dc3545; padding:6px 12px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">🚓 100</a>
+            <a href="tel:108" style="background:#fff0f1; color:#dc3545; padding:6px 12px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">🚑 108</a>
+            <a href="tel:1363" style="background:#e8f0fe; color:#1a73e8; padding:6px 12px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">ℹ️ 1363</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL ITINERARY TIMELINE -->
+      <div class="tc-card">
+        <div class="tc-card-header">
+          <i class="fa-solid fa-calendar-days"></i> Full Itinerary
+        </div>
+        <div class="tc-card-body">
+          <% if (!trip.days || trip.days.length === 0) { %>
+            <div style="text-align:center; color:#aaa; padding:20px;">No days planned yet.</div>
+          <% } else { %>
+            <% trip.days.forEach((day, dayIdx) => { %>
+              <div class="day-block">
+                <div class="day-header">
+                  <span>Day <%= day.day || (dayIdx+1) %></span>
+                  <% if(day.title){ %><span style="font-weight:500; opacity:0.8;">— <%= day.title %></span><% } %>
+                  <% if(day.date){ %><span style="font-size:11px; opacity:0.7; margin-left:auto;"><%= day.date %></span><% } %>
+                </div>
+                <% if (!day.activities || day.activities.length === 0) { %>
+                  <div style="text-align:center; color:#ccc; font-size:12px; padding:10px;">No activities for this day.</div>
+                <% } else { %>
+                  <% day.activities.forEach((act, actIdx) => { 
+                    const actIdStr = act._id ? act._id.toString() : null;
+                    const isDone = actIdStr && completedIds.includes(actIdStr);
+                  %>
+                    <div class="act-row <%= isDone ? 'done-act' : '' %>" id="act-<%= dayIdx %>-<%= actIdx %>">
+                      <div class="act-time"><%= act.arrivalTime || act.time || '—' %></div>
+                      <div class="act-main">
+                        <div class="act-place">
+                          <%= act.place || 'Activity' %>
+                          <span class="act-badge badge-<%= act.type === 'travel' ? 'travel' : (act.type === 'meal' ? 'meal' : 'visit') %>">
+                            <%= act.type || 'visit' %>
+                          </span>
+                          <% if(isDone){ %><span class="act-badge" style="background:#d1e7dd;color:#0f5132;">✓ Done</span><% } %>
+                        </div>
+                        <div class="act-detail">
+                          <% if(act.departureTime){ %><span>Departs: <%= act.departureTime %></span><% } %>
+                          <% if(act.duration){ %><span class="ms-2">⏱ <%= act.duration %></span><% } %>
+                          <% if(act.transportMode){ %><span class="ms-2">🚌 <%= act.transportMode %></span><% } %>
+                        </div>
+                        <% if(act.notes || act.description){ %>
+                          <div style="font-size:11px; color:#888; margin-top:4px; font-style:italic;"><%= act.notes || act.description %></div>
+                        <% } %>
+                        <% 
+                          const costs = [];
+                          if(Number(act.transportCost)>0) costs.push(`Transport: ₹${act.transportCost}`);
+                          if(Number(act.entryFee)>0) costs.push(`Entry: ₹${act.entryFee}`);
+                          if(Number(act.foodCost)>0) costs.push(`Food: ₹${act.foodCost}`);
+                          if(Number(act.otherCost)>0) costs.push(`Other: ₹${act.otherCost}`);
+                        %>
+                        <% if(costs.length > 0){ %>
+                          <div style="font-size:11px; color:#198754; margin-top:4px;"><%= costs.join(' · ') %></div>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } %>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+    </div><!-- End Right Col -->
+  </div><!-- End tc-grid -->
+
+  <!-- ACTION FOOTER -->
+  <div class="tc-footer">
+    <a href="/my-trips" class="btn-back">
+      <i class="fa-solid fa-arrow-left"></i> My Trips
+    </a>
+    <button class="btn-pause" id="pauseTripBtn" onclick="pauseTrip()">
+      <i class="fa-solid fa-pause"></i> Pause Trip
+    </button>
+    <button class="btn-complete" id="completeTripBtn" onclick="confirmCompleteTrip()">
+      <i class="fa-solid fa-flag-checkered"></i> Complete Trip
+    </button>
+    <a href="/my-incidents" class="btn-back" style="background:#fff8e6; color:#856404;">
+      <i class="fa-solid fa-list-check"></i> My Reports
+    </a>
+  </div>
+
+</div><!-- End container -->
+</div><!-- End tc-page -->
+
+<!-- SOS MODAL -->
+<div class="modal-overlay" id="sosModalOverlay">
+  <div class="modal-box">
+    <h5>🆘 Report an Emergency / Safety Incident</h5>
+    
+    <div class="modal-warning">
+      ⚠️ <strong>Important:</strong> Submitting this report sends it to the Maharashtra Tourism safety team. It does <strong>not</strong> automatically contact police, ambulance, or emergency services. For immediate danger, call <strong>112</strong>.
+    </div>
+
+    <div id="sosFormSection">
+      <label>Incident Type <span style="color:red">*</span></label>
+      <select id="sosType">
+        <option value="">— Select —</option>
+        <option value="medical_emergency">Medical Emergency</option>
+        <option value="accident_injury">Accident or Injury</option>
+        <option value="lost_tourist">Lost or Separated Tourist</option>
+        <option value="harassment_safety">Harassment / Personal Safety</option>
+        <option value="unsafe_restricted_area">Unsafe or Restricted Area</option>
+        <option value="lost_belongings">Lost Belongings</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label>Description <span style="color:red">*</span> (min 5 chars)</label>
+      <textarea id="sosDescription" rows="3" placeholder="Describe what happened and where…"></textarea>
+
+      <label>Your Phone (optional)</label>
+      <input type="tel" id="sosPhone" placeholder="e.g. 9876543210" />
+
+      <div class="modal-consent">
+        <label style="cursor:pointer; display:flex; gap:8px; align-items:flex-start; margin-bottom:0;">
+          <input type="checkbox" id="sosLocationConsent" style="width:auto; margin-top:2px; margin-bottom:0;" />
+          <span><strong>Include my current GPS location in this report.</strong><br>
+          <em style="color:#888;">Only your consented coordinates will be saved. Location is obtained fresh when you submit. Do not check if you haven't granted browser location permission or if you prefer not to share your position.</em></span>
+        </label>
+      </div>
+
+      <div id="sosLocationNote" style="display:none; font-size:11px; color:#888; margin-bottom:10px; padding:8px; background:#f8f8f8; border-radius:8px;">
+        <i class="fa-solid fa-info-circle me-1"></i> Location will be captured fresh when you tap Submit.
+      </div>
+
+      <div class="modal-footer-btns">
+        <button class="btn-sos-cancel" onclick="closeSOSModal()">Cancel</button>
+        <button class="btn-sos-submit" id="sosSubmitBtn" onclick="submitSOSReport()">
+          <i class="fa-solid fa-triangle-exclamation me-1"></i> Submit Report
+        </button>
+      </div>
+    </div>
+
+    <div class="sos-result" id="sosResult">
+      <div style="font-weight:800; color:#198754; margin-bottom:6px;">✅ Report Submitted</div>
+      <div style="font-size:13px;">Your report has been received. Reference ID: <strong id="sosRefId"></strong></div>
+      <div style="font-size:12px; color:#888; margin-top:6px;">The safety team has been notified. For emergencies, call <a href="tel:112" style="font-weight:800; color:red;">112</a>.</div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <a href="/my-incidents" style="background:#e8f6ef; color:#198754; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; text-decoration:none;">View My Reports</a>
+        <button onclick="closeSOSModal()" style="background:#f0f0f0; color:#555; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; border:none; cursor:pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =======================================================
+// TRIP DATA (injected server-side)
+// =======================================================
+const TRIP_ID = '<%= tripId %>';
+const ALL_STOPS = <%- JSON.stringify(allStops.map(s => ({
+  stopIndex: s.stopIndex,
+  dayIndex: s.dayIndex,
+  activityIndex: s.activityIndex,
+  activityId: s.activityId,
+  dayLabel: s.dayLabel,
+  dayDate: s.dayDate,
+  place: s.place,
+  type: s.type,
+  arrivalTime: s.arrivalTime,
+  transportMode: s.transportMode,
+  notes: s.notes,
+  lat: s.destInfo ? s.destInfo.latitude : null,
+  lon: s.destInfo ? s.destInfo.longitude : null
+}))) %>;
+
+const DEST_MAP = <%- destinationMapJSON %>;
+const COMPLETED_IDS = <%- JSON.stringify(completedIds) %>;
+const DAYS_COUNT = <%= daysCount %>;
+
+let currentStopIdx = 0;
+let userLat = null, userLon = null;
+let gpsWatchId = null;
+let safetyWatchId = null;
+let allGeofences = [];
+let zoneState = {}; // track enter/exit per zone
+let leafletMap = null;
+let userMarker = null;
+let stopMarkers = [];
+let routeLine = null;
+let isMonitoring = false;
+let progressSaveTimer = null;
+
+// =======================================================
+// MAHARASHTRA CITIES & RAILWAY STATIONS DATA
+// =======================================================
+const STARTING_CITY = '<%= trip.startingCity || "Pune" %>';
+
+const CITY_COORDS = {
+  'pune': [18.5204, 73.8567],
+  'mumbai': [18.9220, 72.8347],
+  'nashik': [19.9975, 73.7898],
+  'nagpur': [21.1458, 79.0882],
+  'chhatrapati sambhajinagar': [19.8762, 75.3433],
+  'aurangabad': [19.8762, 75.3433],
+  'kolhapur': [16.7050, 74.2433],
+  'solapur': [17.6599, 75.9064],
+  'satara': [17.6805, 74.0183],
+  'thane': [19.2183, 72.9781],
+  'navi mumbai': [19.0330, 73.0297],
+  'ratnagiri': [16.9902, 73.3120],
+  'amravati': [20.9374, 77.7796],
+  'nanded': [19.1383, 77.3210],
+  'jalgaon': [21.0077, 75.5626],
+  'alibaug': [18.6414, 72.8722],
+  'lonavala': [18.7557, 73.4091],
+  'mahabaleshwar': [17.9237, 73.6586],
+  'shirdi': [19.7667, 74.4766],
+  'sindhudurg': [16.1167, 73.7167],
+  'malvan': [16.0617, 73.4686],
+  'akola': [20.7002, 77.0082],
+  'chandrapur': [19.9615, 79.2961],
+  'raigad': [18.2358, 73.4428]
+};
+
+const MAHARASHTRA_STATIONS = [
+  { name: 'Chhatrapati Shivaji Maharaj Terminus (CSMT Mumbai)', lat: 18.9400, lon: 72.8353, district: 'Mumbai' },
+  { name: 'Dadar Junction (Dadar Jn)', lat: 19.0178, lon: 72.8478, district: 'Mumbai' },
+  { name: 'Thane Railway Station', lat: 19.1860, lon: 72.9756, district: 'Thane' },
+  { name: 'Kalyan Junction (Kalyan Jn)', lat: 19.2355, lon: 73.1303, district: 'Thane' },
+  { name: 'Panvel Junction (Panvel Jn)', lat: 18.9886, lon: 73.1213, district: 'Raigad' },
+  { name: 'Roha Railway Station', lat: 18.4370, lon: 73.1235, district: 'Raigad' },
+  { name: 'Pune Junction (Pune Jn)', lat: 18.5284, lon: 73.8743, district: 'Pune' },
+  { name: 'Lonavala Railway Station', lat: 18.7523, lon: 73.4077, district: 'Pune' },
+  { name: 'Daund Junction (Daund Jn)', lat: 18.4633, lon: 74.5828, district: 'Pune' },
+  { name: 'Nashik Road Railway Station', lat: 19.9572, lon: 73.8441, district: 'Nashik' },
+  { name: 'Manmad Junction (Manmad Jn)', lat: 20.2520, lon: 74.4390, district: 'Nashik' },
+  { name: 'Igatpuri Railway Station', lat: 19.6975, lon: 73.5590, district: 'Nashik' },
+  { name: 'Sainagar Shirdi Railway Station', lat: 19.7644, lon: 74.4920, district: 'Ahmednagar' },
+  { name: 'Ahmednagar Railway Station', lat: 19.0772, lon: 74.7470, district: 'Ahmednagar' },
+  { name: 'Chhatrapati Sambhajinagar Railway Station', lat: 19.8550, lon: 75.3217, district: 'Chhatrapati Sambhaji Nagar' },
+  { name: 'Jalna Railway Station', lat: 19.8347, lon: 75.8816, district: 'Jalna' },
+  { name: 'Hazur Sahib Nanded Railway Station', lat: 19.1485, lon: 77.3190, district: 'Nanded' },
+  { name: 'Satara Railway Station', lat: 17.6710, lon: 74.0320, district: 'Satara' },
+  { name: 'Karad Railway Station', lat: 17.2917, lon: 74.2014, district: 'Satara' },
+  { name: 'Kolhapur CSMT Railway Station', lat: 16.7029, lon: 74.2404, district: 'Kolhapur' },
+  { name: 'Sangli Railway Station', lat: 16.8524, lon: 74.5815, district: 'Sangli' },
+  { name: 'Miraj Junction (Miraj Jn)', lat: 16.8290, lon: 74.6465, district: 'Sangli' },
+  { name: 'Solapur Junction (Solapur Jn)', lat: 17.6715, lon: 75.9104, district: 'Solapur' },
+  { name: 'Pandharpur Railway Station', lat: 17.6740, lon: 75.3270, district: 'Solapur' },
+  { name: 'Ratnagiri Konkan Railway Station', lat: 16.9809, lon: 73.3370, district: 'Ratnagiri' },
+  { name: 'Chiplun Railway Station', lat: 17.5186, lon: 73.5235, district: 'Ratnagiri' },
+  { name: 'Kankavli Railway Station', lat: 16.2731, lon: 73.7073, district: 'Sindhudurg' },
+  { name: 'Kudal Railway Station', lat: 16.0080, lon: 73.6930, district: 'Sindhudurg' },
+  { name: 'Sawantwadi Road Railway Station', lat: 15.9080, lon: 73.8180, district: 'Sindhudurg' },
+  { name: 'Nagpur Junction (Nagpur Jn)', lat: 21.1524, lon: 79.0888, district: 'Nagpur' },
+  { name: 'Amravati Railway Station', lat: 20.9320, lon: 77.7523, district: 'Amravati' },
+  { name: 'Akola Junction (Akola Jn)', lat: 20.7100, lon: 77.0080, district: 'Akola' },
+  { name: 'Jalgaon Junction (Jalgaon Jn)', lat: 21.0077, lon: 75.5626, district: 'Jalgaon' },
+  { name: 'Bhusawal Junction (Bhusawal Jn)', lat: 21.0475, lon: 75.7942, district: 'Jalgaon' },
+  { name: 'Chandrapur Railway Station', lat: 19.9570, lon: 79.2960, district: 'Chandrapur' }
+];
+
+let currentTravelMode = 'bike'; // 'bike' | 'train' | 'car' | 'walk'
+let activeRouteLayers = [];
+let routeAbortController = null;
+
+// =======================================================
+// MAP INITIALIZATION
+// =======================================================
+function initMap() {
+  leafletMap = L.map('tripMap', { zoomControl: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(leafletMap);
+
+  // Add destination markers
+  const validStops = ALL_STOPS.filter(s => s.lat && s.lon);
+  const bounds = [];
+
+  validStops.forEach((stop, i) => {
+    const isCurrent = i === currentStopIdx;
+    const icon = L.divIcon({
+      html: `<div id="map-stop-marker-${i}" style="background:${isCurrent ? '#dc3545' : '#198754'};color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;border:2px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer;">${stop.stopIndex + 1}</div>`,
+      className: '',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+    const marker = L.marker([stop.lat, stop.lon], { icon })
+      .bindPopup(`<strong>${stop.place}</strong><br>${stop.dayLabel}${stop.arrivalTime ? '<br>🕐 ' + stop.arrivalTime : ''}<br><button onclick="goToStop(${i})" style="margin-top:6px;background:#198754;color:white;border:none;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:bold;cursor:pointer;">Navigate Here</button>`);
+    marker.addTo(leafletMap);
+    stopMarkers.push(marker);
+    bounds.push([stop.lat, stop.lon]);
+  });
+
+  if (bounds.length > 0) {
+    leafletMap.fitBounds(bounds, { padding: [40, 40] });
+  } else {
+    // Default to Maharashtra center
+    leafletMap.setView([19.7515, 75.7139], 7);
+  }
+
+  // Draw initial route
+  setTimeout(() => {
+    fetchAndDrawRoute();
+  }, 400);
+}
+
+// =======================================================
+// TRAVEL MODE SELECTOR (Bike / Train / Car / Walk)
+// =======================================================
+function setTravelMode(mode) {
+  currentTravelMode = mode;
+
+  // Update tabs UI
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById('modeBtn-' + mode);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }
+
+  const modeLabels = {
+    'bike': '🏍️ Bike Route Selected',
+    'train': '🚆 Train Route Selected',
+    'car': '🚗 Car Drive Selected',
+    'walk': '🚶 Walking Trail Selected'
+  };
+  const modeBadges = {
+    'bike': '<i class="fa-solid fa-motorcycle me-1"></i> Bike Route',
+    'train': '<i class="fa-solid fa-train me-1"></i> Train Route',
+    'car': '<i class="fa-solid fa-car me-1"></i> Car Route',
+    'walk': '<i class="fa-solid fa-person-walking me-1"></i> Walking Trail'
+  };
+  const legendLines = {
+    'bike': { color: '#ea580c', text: 'Bike Route (Road)' },
+    'train': { color: '#4f46e5', text: 'Railway Track' },
+    'car': { color: '#0284c7', text: 'Car Route (Highway)' },
+    'walk': { color: '#16a34a', text: 'Walking Trail' }
+  };
+
+  document.getElementById('activeModeLabel').innerHTML = modeLabels[mode] || mode;
+  document.getElementById('routeModeBadge').innerHTML = modeBadges[mode] || mode;
+
+  const legLine = document.getElementById('routeLegendLine');
+  const legTxt = document.getElementById('routeLegendText');
+  if (legLine) legLine.style.color = legendLines[mode]?.color || '#ea580c';
+  if (legTxt) legTxt.textContent = legendLines[mode]?.text || 'Route';
+
+  // Toggle train details visibility
+  const trainBox = document.getElementById('trainDetailsBox');
+  if (trainBox) {
+    trainBox.style.display = mode === 'train' ? 'block' : 'none';
+  }
+
+  fetchAndDrawRoute();
+}
+
+// Helper: Find nearest railway station
+function findNearestStation(lat, lon) {
+  let nearest = null;
+  let minDist = Infinity;
+  for (const st of MAHARASHTRA_STATIONS) {
+    const d = haversine(lat, lon, st.lat, st.lon);
+    if (d < minDist) {
+      minDist = d;
+      nearest = { ...st, distanceKm: d };
+    }
+  }
+  return nearest;
+}
+
+// Helper: Determine origin coordinates
+function getOriginCoordinates() {
+  if (userLat && userLon) {
+    return { lat: userLat, lon: userLon, name: 'Your Location (Live GPS)' };
+  }
+  if (currentStopIdx > 0) {
+    const prev = ALL_STOPS[currentStopIdx - 1];
+    if (prev && prev.lat && prev.lon) {
+      return { lat: prev.lat, lon: prev.lon, name: prev.place };
+    }
+  }
+  // Lookup starting city
+  const cityKey = (STARTING_CITY || 'Pune').toLowerCase().trim();
+  const coords = CITY_COORDS[cityKey] || [18.5204, 73.8567];
+  return { lat: coords[0], lon: coords[1], name: STARTING_CITY || 'Starting City' };
+}
+
+// =======================================================
+// ROUTE CALCULATION & MAP DRAWING (OSRM & RAILWAY ENGINE)
+// =======================================================
+async function fetchAndDrawRoute() {
+  if (currentStopIdx >= ALL_STOPS.length) return;
+  const currentStop = ALL_STOPS[currentStopIdx];
+
+  // Clear previous route layers
+  activeRouteLayers.forEach(layer => {
+    if (leafletMap && layer) leafletMap.removeLayer(layer);
+  });
+  activeRouteLayers = [];
+
+  const origin = getOriginCoordinates();
+
+  if (!currentStop || !currentStop.lat || !currentStop.lon) {
+    document.getElementById('routeDistanceText').textContent = 'Unavailable';
+    document.getElementById('routeDurationText').textContent = '--';
+    document.getElementById('routeAdviceText').innerHTML = 'Exact GPS coordinates unavailable for this stop.';
+    document.getElementById('mapsLinkContainer').style.display = 'none';
+    return;
+  }
+
+  const destLat = currentStop.lat;
+  const destLon = currentStop.lon;
+  const destName = currentStop.place;
+
+  // Update UI to loading
+  document.getElementById('routeDistanceText').innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+  document.getElementById('routeDurationText').textContent = 'Calculating...';
+
+  // 1. TRAIN / RAILWAY ROUTING
+  if (currentTravelMode === 'train') {
+    handleTrainRouting(origin, { lat: destLat, lon: destLon, name: destName });
+    return;
+  }
+
+  // 2. ROAD ROUTING (BIKE, CAR, WALK) VIA OSRM API
+  const osrmProfile = currentTravelMode === 'walk' ? 'foot' : 'driving';
+  const osrmUrl = `https://router.project-osrm.org/route/v1/${osrmProfile}/${origin.lon},${origin.lat};${destLon},${destLat}?overview=full&geometries=geojson&steps=true`;
+
+  try {
+    if (routeAbortController) {
+      routeAbortController.abort();
+    }
+    routeAbortController = new AbortController();
+
+    const response = await fetch(osrmUrl, { signal: routeAbortController.signal });
+    if (!response.ok) throw new Error('OSRM API HTTP ' + response.status);
+    const data = await response.json();
+
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const distKm = (route.distance / 1000).toFixed(1);
+
+      // Convert coordinates from GeoJSON [lon, lat] to Leaflet [lat, lon]
+      const latlngs = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+
+      // Style by mode
+      let routeColor = '#ea580c'; // Bike orange
+      let routeWeight = 6;
+      let routeDash = null;
+
+      if (currentTravelMode === 'car') {
+        routeColor = '#0284c7';
+      } else if (currentTravelMode === 'walk') {
+        routeColor = '#16a34a';
+        routeWeight = 5;
+        routeDash = '6, 6';
+      }
+
+      // Draw polyline
+      const polyline = L.polyline(latlngs, {
+        color: routeColor,
+        weight: routeWeight,
+        opacity: 0.85,
+        dashArray: routeDash,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(leafletMap);
+      activeRouteLayers.push(polyline);
+
+      // Travel Time Calculations
+      let etaMinutes = 0;
+      if (currentTravelMode === 'bike') {
+        // Average bike speed ~48 km/h in Maharashtra + ghat turns
+        etaMinutes = Math.max(5, Math.round((Number(distKm) / 48) * 60));
+      } else if (currentTravelMode === 'car') {
+        etaMinutes = Math.max(5, Math.round((Number(distKm) / 62) * 60));
+      } else {
+        etaMinutes = Math.max(5, Math.round((Number(distKm) / 4.5) * 60));
+      }
+
+      const hrs = Math.floor(etaMinutes / 60);
+      const mins = etaMinutes % 60;
+      const durationText = hrs > 0 ? `${hrs} hr ${mins} mins` : `${mins} mins`;
+
+      document.getElementById('routeDistanceText').textContent = `${distKm} km`;
+      document.getElementById('routeDurationText').textContent = durationText;
+
+      // Best Route Guidance
+      let adviceHtml = '';
+      if (currentTravelMode === 'bike') {
+        adviceHtml = `
+          <strong>🏍️ Recommended Bike Route:</strong> Direct scenic highway route from ${origin.name} to ${destName}. 
+          The state highway and old highway routes (Old NH48/SH) offer smooth two-wheeler cruising with scenic vistas. 
+          Ride at moderate speeds on ghat hairpins. <em>(Helmet & protective riding gear mandatory)</em>
+        `;
+      } else if (currentTravelMode === 'car') {
+        adviceHtml = `
+          <strong>🚗 Recommended Car Route:</strong> Expressways and primary national highways from ${origin.name} to ${destName}. 
+          Keep FASTag active for toll plazas and maintain safe braking distance on ghat declines.
+        `;
+      } else {
+        adviceHtml = `
+          <strong>🚶 Walking / Trekking Route:</strong> Follow designated footpaths and walking trails from ${origin.name} to ${destName}. 
+          Stay hydrated and wear sturdy trail footwear.
+        `;
+      }
+      document.getElementById('routeAdviceText').innerHTML = adviceHtml;
+
+      // Update Google Maps button
+      updateGoogleMapsButton(origin, { lat: destLat, lon: destLon }, currentTravelMode);
+
+      // Fit bounds
+      fitRouteBounds();
+    } else {
+      throw new Error('No route returned by OSRM');
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    console.warn('OSRM route fetch fallback to straight-line:', err);
+    fallbackDirectRoute(origin, { lat: destLat, lon: destLon, name: destName }, currentTravelMode);
+  }
+}
+
+// Fallback when offline or OSRM unavailable
+function fallbackDirectRoute(origin, dest, mode) {
+  const straightDist = haversine(origin.lat, origin.lon, dest.lat, dest.lon);
+  const roadDist = (straightDist * 1.3).toFixed(1); // Standard winding factor
+
+  let speed = mode === 'bike' ? 45 : (mode === 'car' ? 60 : 4.5);
+  const totalMins = Math.round((Number(roadDist) / speed) * 60);
+  const hrs = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  const durTxt = hrs > 0 ? `${hrs} hr ${mins} mins` : `${mins} mins`;
+
+  document.getElementById('routeDistanceText').textContent = `~${roadDist} km`;
+  document.getElementById('routeDurationText').textContent = durTxt;
+
+  // Simple direct line with dash
+  const color = mode === 'bike' ? '#ea580c' : (mode === 'car' ? '#0284c7' : '#16a34a');
+  const line = L.polyline([[origin.lat, origin.lon], [dest.lat, dest.lon]], {
+    color: color, weight: 4, opacity: 0.8, dashArray: '8, 8'
+  }).addTo(leafletMap);
+  activeRouteLayers.push(line);
+
+  document.getElementById('routeAdviceText').innerHTML = `
+    <strong>${mode === 'bike' ? '🏍️ Bike' : '🚗 Vehicle'} Route:</strong> Direct roadway from ${origin.name} to ${dest.name} (Estimated road distance: ~${roadDist} km). 
+    Use the Google Maps button below to start turn-by-turn navigation.
+  `;
+
+  updateGoogleMapsButton(origin, dest, mode);
+  fitRouteBounds();
+}
+
+// Handle Train / Railway Routing
+function handleTrainRouting(origin, dest) {
+  const stOrigin = findNearestStation(origin.lat, origin.lon);
+  const stDest = findNearestStation(dest.lat, dest.lon);
+
+  if (!stOrigin || !stDest) {
+    document.getElementById('routeDistanceText').textContent = '--';
+    document.getElementById('routeDurationText').textContent = '--';
+    document.getElementById('routeAdviceText').innerHTML = 'Nearest railway station could not be determined.';
+    return;
+  }
+
+  const dToOriginStation = haversine(origin.lat, origin.lon, stOrigin.lat, stOrigin.lon);
+  const railDistance = haversine(stOrigin.lat, stOrigin.lon, stDest.lat, stDest.lon) * 1.25;
+  const dFromDestStation = haversine(stDest.lat, stDest.lon, dest.lat, dest.lon);
+  const totalDist = (dToOriginStation + railDistance + dFromDestStation).toFixed(1);
+
+  // Train travel time @ approx 52 km/h
+  const trainMins = Math.max(15, Math.round((railDistance / 52) * 60));
+  const hrs = Math.floor(trainMins / 60);
+  const mins = trainMins % 60;
+  const trainTimeTxt = hrs > 0 ? `${hrs} hr ${mins} mins` : `${mins} mins`;
+
+  document.getElementById('routeDistanceText').textContent = `${totalDist} km`;
+  document.getElementById('routeDurationText').textContent = trainTimeTxt;
+
+  // Draw 3 segments on map:
+  // 1. Origin to StOrigin (dashed road)
+  const leg1 = L.polyline([[origin.lat, origin.lon], [stOrigin.lat, stOrigin.lon]], {
+    color: '#0d6efd', weight: 4, opacity: 0.8, dashArray: '6, 6'
+  }).addTo(leafletMap);
+  activeRouteLayers.push(leg1);
+
+  // 2. StOrigin to StDest (Railway track: dual line styling)
+  const railBase = L.polyline([[stOrigin.lat, stOrigin.lon], [stDest.lat, stDest.lon]], {
+    color: '#1e293b', weight: 6, opacity: 0.9
+  }).addTo(leafletMap);
+  activeRouteLayers.push(railBase);
+
+  const railDashes = L.polyline([[stOrigin.lat, stOrigin.lon], [stDest.lat, stDest.lon]], {
+    color: '#ffffff', weight: 4, opacity: 0.9, dashArray: '8, 8'
+  }).addTo(leafletMap);
+  activeRouteLayers.push(railDashes);
+
+  // 3. StDest to Destination spot (dashed green)
+  const leg3 = L.polyline([[stDest.lat, stDest.lon], [dest.lat, dest.lon]], {
+    color: '#198754', weight: 4, opacity: 0.8, dashArray: '6, 6'
+  }).addTo(leafletMap);
+  activeRouteLayers.push(leg3);
+
+  // Add station icons on map
+  const stIcon = L.divIcon({
+    html: '<div style="background:#4f46e5;color:white;border-radius:8px;padding:3px 7px;font-size:11px;font-weight:bold;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap;">🚉 Rail</div>',
+    className: '', iconSize: [40, 20], iconAnchor: [20, 10]
+  });
+  const m1 = L.marker([stOrigin.lat, stOrigin.lon], { icon: stIcon }).bindPopup(`<strong>Boarding Station:</strong> ${stOrigin.name}`);
+  const m2 = L.marker([stDest.lat, stDest.lon], { icon: stIcon }).bindPopup(`<strong>Arrival Station:</strong> ${stDest.name}`);
+  m1.addTo(leafletMap);
+  m2.addTo(leafletMap);
+  activeRouteLayers.push(m1, m2);
+
+  // Advice & Station info text
+  document.getElementById('routeAdviceText').innerHTML = `
+    <strong>🚆 Rail Transit Route:</strong> Travel from ${origin.name} to <strong>${stOrigin.name}</strong>. 
+    Board an express or local train to <strong>${stDest.name}</strong>. From ${stDest.name}, take local transport (${dFromDestStation.toFixed(1)} km) to reach ${dest.name}.
+  `;
+
+  document.getElementById('trainStationsText').innerHTML = `
+    <div><strong>1. Boarding Station:</strong> ${stOrigin.name} (${dToOriginStation.toFixed(1)} km away)</div>
+    <div><strong>2. Destination Station:</strong> ${stDest.name}</div>
+    <div><strong>3. Station to Destination:</strong> ${dFromDestStation.toFixed(1)} km (local taxi/auto/bus available)</div>
+  `;
+
+  updateGoogleMapsButton(origin, dest, 'train');
+  fitRouteBounds();
+}
+
+// Update Google Maps button URL and text based on mode
+function updateGoogleMapsButton(origin, dest, mode) {
+  const mapsLink = document.getElementById('mapsNavLink');
+  const mapsLabel = document.getElementById('mapsNavLabel');
+  if (!mapsLink) return;
+
+  const gmapsMode = mode === 'bike' ? 'two_wheeler' : (mode === 'train' ? 'transit' : (mode === 'walk' ? 'walking' : 'driving'));
+  const url = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lon}&destination=${dest.lat},${dest.lon}&travelmode=${gmapsMode}`;
+
+  mapsLink.href = url;
+
+  const labels = {
+    'bike': '🏍️ Start Bike Navigation in Google Maps (Two-Wheeler Mode)',
+    'train': '🚆 View Train Timetable & Route in Google Maps (Transit Mode)',
+    'car': '🚗 Start Car Navigation in Google Maps (Driving Mode)',
+    'walk': '🚶 Start Walking Directions in Google Maps (Walking Mode)'
+  };
+  if (mapsLabel) {
+    mapsLabel.textContent = labels[mode] || 'Open in Google Maps';
+  }
+  document.getElementById('mapsLinkContainer').style.display = 'block';
+}
+
+// Fit map bounds to show full route and stops
+function fitRouteBounds() {
+  if (!leafletMap) return;
+  const pts = [];
+
+  // Add origin & dest
+  const origin = getOriginCoordinates();
+  if (origin && origin.lat && origin.lon) pts.push([origin.lat, origin.lon]);
+
+  if (currentStopIdx < ALL_STOPS.length) {
+    const st = ALL_STOPS[currentStopIdx];
+    if (st.lat && st.lon) pts.push([st.lat, st.lon]);
+  }
+
+  // Also include route coordinates if any
+  activeRouteLayers.forEach(layer => {
+    if (layer.getLatLngs) {
+      const lls = layer.getLatLngs();
+      if (Array.isArray(lls)) {
+        lls.forEach(pt => {
+          if (pt.lat && pt.lng) pts.push([pt.lat, pt.lng]);
+        });
+      }
+    }
+  });
+
+  if (pts.length > 0) {
+    leafletMap.fitBounds(pts, { padding: [45, 45], maxZoom: 15 });
+  }
+}
+
+// =======================================================
+// GPS LOCATION TRACKING
+// =======================================================
+function requestLocationPermission() {
+  if (!navigator.geolocation) {
+    showGPSError('Geolocation is not supported by your browser.');
+    return;
+  }
+  document.getElementById('enableLocationBtn').disabled = true;
+  document.getElementById('enableLocationBtn').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Requesting…';
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    onLocationSuccess,
+    onLocationError,
+    { enableHighAccuracy: true, maximumAge: 15000, timeout: 15000 }
+  );
+}
+
+function onLocationSuccess(position) {
+  userLat = position.coords.latitude;
+  userLon = position.coords.longitude;
+  const acc = position.coords.accuracy ? position.coords.accuracy.toFixed(0) : 'N/A';
+
+  document.getElementById('locationConsentBox').style.display = 'none';
+  document.getElementById('enableLocationBtn').style.display = 'none';
+  document.getElementById('disableLocationBtn').style.display = 'flex';
+  document.getElementById('gpsBadge').className = 'safety-status-pill pill-active';
+  document.getElementById('gpsBadge').innerHTML = '<span class="gps-dot active" id="gpsDot"></span> GPS Active';
+  document.getElementById('gpsCoords').textContent = `${userLat.toFixed(5)}°N, ${userLon.toFixed(5)}°E`;
+  document.getElementById('gpsAccuracy').textContent = `Accuracy: ±${acc}m`;
+
+  // Update user marker on map
+  if (leafletMap) {
+    const userIcon = L.divIcon({
+      html: '<div style="background:#0d6efd;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 5px rgba(13,110,253,0.35);"></div>',
+      className: '', iconSize: [16, 16], iconAnchor: [8, 8]
+    });
+    if (userMarker) { leafletMap.removeLayer(userMarker); }
+    userMarker = L.marker([userLat, userLon], { icon: userIcon })
+      .bindPopup('<strong>Your Location (Live GPS)</strong>')
+      .addTo(leafletMap);
+  }
+
+  // Recalculate route with live GPS location
+  fetchAndDrawRoute();
+
+  // Load weather for current location if first time
+  if (!window._weatherLoadedForCurrentLoc) {
+    window._weatherLoadedForCurrentLoc = true;
+    loadWeatherForCoords(userLat, userLon, 'Your Current Location');
+  }
+}
+
+function onLocationError(err) {
+  document.getElementById('enableLocationBtn').disabled = false;
+  document.getElementById('enableLocationBtn').innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Enable Location';
+  const msgs = {
+    1: 'Location access denied. Please allow location access in your browser settings.',
+    2: 'Location unavailable. Make sure GPS is enabled on your device.',
+    3: 'Location request timed out. Please try again.'
+  };
+  showGPSError(msgs[err.code] || 'Unable to get location.');
+}
+
+function showGPSError(msg) {
+  document.getElementById('gpsCoords').textContent = msg;
+  document.getElementById('gpsCoords').style.color = '#dc3545';
+}
+
+function stopLocationTracking() {
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+  userLat = null; userLon = null;
+  document.getElementById('enableLocationBtn').style.display = 'flex';
+  document.getElementById('enableLocationBtn').disabled = false;
+  document.getElementById('enableLocationBtn').innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Enable Location';
+  document.getElementById('disableLocationBtn').style.display = 'none';
+  document.getElementById('gpsBadge').className = 'safety-status-pill pill-inactive';
+  document.getElementById('gpsBadge').innerHTML = '<span class="gps-dot inactive"></span> GPS Off';
+  document.getElementById('gpsCoords').textContent = 'Location tracking stopped.';
+  document.getElementById('gpsCoords').style.color = '#aaa';
+  document.getElementById('gpsAccuracy').textContent = '';
+  document.getElementById('locationConsentBox').style.display = 'block';
+  if (userMarker && leafletMap) { leafletMap.removeLayer(userMarker); userMarker = null; }
+  window._weatherLoadedForCurrentLoc = false;
+
+  // Redraw route from starting city
+  fetchAndDrawRoute();
+}
+
+// =======================================================
+// STOP NAVIGATION
+// =======================================================
+function goToStop(idx) {
+  if (idx < 0 || idx >= ALL_STOPS.length) return;
+  currentStopIdx = idx;
+  const stop = ALL_STOPS[idx];
+
+  // Auto-detect transport mode if defined on stop
+  if (stop.transportMode) {
+    const t = stop.transportMode.toLowerCase();
+    if (t.includes('bike') || t.includes('motorcycle') || t.includes('scooter') || t.includes('बाईक')) {
+      setTravelMode('bike');
+    } else if (t.includes('train') || t.includes('rail') || t.includes('ट्रेन') || t.includes('रेल्वे')) {
+      setTravelMode('train');
+    } else if (t.includes('car') || t.includes('cab') || t.includes('taxi') || t.includes('drive') || t.includes('कार')) {
+      setTravelMode('car');
+    } else if (t.includes('walk') || t.includes('trek') || t.includes('पायी')) {
+      setTravelMode('walk');
+    }
+  }
+
+  // Update header
+  document.getElementById('currentDestName').textContent = stop.place;
+  document.getElementById('currentDestMeta').textContent =
+    `${stop.dayLabel}${stop.arrivalTime ? ' · ' + stop.arrivalTime : ''} · ${stop.type}`;
+
+  // Update marker colours
+  stopMarkers.forEach((m, i) => {
+    const el = m.getElement();
+    if (!el) return;
+    const div = el.querySelector('div');
+    if (div) div.style.background = i === idx ? '#dc3545' : '#198754';
+  });
+
+  // Update prev/next buttons
+  document.getElementById('prevStopBtn').disabled = idx === 0;
+  document.getElementById('nextStopBtn').disabled = idx >= ALL_STOPS.length - 1;
+
+  // Update all stops highlight
+  document.querySelectorAll('[id^="stop-num-"]').forEach((el, i) => {
+    el.classList.remove('active');
+    if (i === idx) el.classList.add('active');
+  });
+
+  // Recalculate route and redraw
+  fetchAndDrawRoute();
+
+  // Save progress
+  saveProgress();
+}
+
+function markCurrentArrived() {
+  const stop = ALL_STOPS[currentStopIdx];
+  if (!stop) return;
+  markStopDone(currentStopIdx, stop.activityId);
+}
+
+function markStopDone(si, activityId) {
+  if (COMPLETED_IDS.includes(activityId)) return;
+
+  if (!confirm(`Mark "${ALL_STOPS[si].place}" as visited?`)) return;
+
+  COMPLETED_IDS.push(activityId);
+
+  // Update UI
+  const numEl = document.getElementById(`stop-num-${si}`);
+  if (numEl) { numEl.classList.remove('active'); numEl.classList.add('done'); numEl.textContent = '✓'; }
+
+  const doneBtn = document.getElementById(`done-btn-${si}`);
+  if (doneBtn) {
+    doneBtn.outerHTML = '<span style="font-size:11px; color:var(--tc-green); font-weight:700;">✅ Visited</span>';
+  }
+
+  // Save to server
+  fetch(`/my-trips/${TRIP_ID}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      currentDayIndex: ALL_STOPS[si].dayIndex,
+      currentActivityIndex: ALL_STOPS[si].activityIndex,
+      completedActivityId: activityId
+    })
+  }).catch(console.error);
+
+  // Move to next stop automatically
+  if (si < ALL_STOPS.length - 1) {
+    setTimeout(() => goToStop(si + 1), 500);
+  } else {
+    document.getElementById('completeTripBtn').style.animation = 'pulse 1s 3';
+  }
+}
+
+// =======================================================
+// HAVERSINE DISTANCE (km)
+// =======================================================
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// =======================================================
+// SAFETY MONITORING + GEOFENCING
+// =======================================================
+function startSafetyMonitoring() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  document.getElementById('startMonitoringBtn').disabled = true;
+  document.getElementById('stopMonitoringBtn').disabled = false;
+  document.getElementById('monitoringStatusBadge').className = 'safety-status-pill pill-active';
+  document.getElementById('monitoringStatusBadge').innerHTML = '<span class="gps-dot active" id="monDot"></span> Monitoring Active';
+  document.getElementById('gfEmptyState').style.display = 'none';
+  isMonitoring = true;
+
+  safetyWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const acc = pos.coords.accuracy;
+      const ts = new Date().toLocaleTimeString();
+      document.getElementById('gpsStatusLine').textContent = `📡 Last update: ${ts} · ±${acc ? acc.toFixed(0) : '?'}m accuracy`;
+      checkGeofences(lat, lon);
+      // Also update user location
+      onLocationSuccess(pos);
+    },
+    (err) => {
+      const msgs = {1:'Location denied.',2:'Location unavailable.',3:'Timeout.'};
+      document.getElementById('gpsStatusLine').textContent = `⚠️ GPS Error: ${msgs[err.code] || 'Unknown error.'}`;
+      stopSafetyMonitoring();
+    },
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+  );
+
+  // Load geofences from server
+  fetch('/api/safety/geofences', { credentials: 'include' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.zones) {
+        allGeofences = data.zones.filter(z => typeof z.latitude === 'number' && typeof z.longitude === 'number');
+      } else if (Array.isArray(data)) {
+        allGeofences = data.filter(z => typeof z.latitude === 'number' && typeof z.longitude === 'number');
+      }
+    })
+    .catch(e => console.error('Geofence load failed:', e));
+}
+
+function stopSafetyMonitoring() {
+  if (safetyWatchId !== null) {
+    navigator.geolocation.clearWatch(safetyWatchId);
+    safetyWatchId = null;
+  }
+  isMonitoring = false;
+  zoneState = {};
+  document.getElementById('startMonitoringBtn').disabled = false;
+  document.getElementById('stopMonitoringBtn').disabled = true;
+  document.getElementById('monitoringStatusBadge').className = 'safety-status-pill pill-inactive';
+  document.getElementById('monitoringStatusBadge').innerHTML = '<span class="gps-dot inactive"></span> Stopped';
+  document.getElementById('gpsStatusLine').textContent = 'Monitoring stopped.';
+}
+
+const HYSTERESIS = 1.15; // 15% buffer to prevent boundary flickering
+
+function checkGeofences(lat, lon) {
+  if (!allGeofences || allGeofences.length === 0) return;
+  const logEl = document.getElementById('gfAlertLog');
+
+  allGeofences.forEach(zone => {
+    const distKm = haversine(lat, lon, zone.latitude, zone.longitude);
+    const distM = distKm * 1000;
+    const radius = zone.radius || 400;
+    const prev = zoneState[zone.id] || false;
+    const inside = distM <= radius;
+    const exitThreshold = radius * HYSTERESIS;
+    const exitZone = distM > exitThreshold;
+
+    if (inside && !prev) {
+      zoneState[zone.id] = true;
+      addGeofenceAlert(logEl, zone, distM, 'enter');
+    } else if (exitZone && prev) {
+      zoneState[zone.id] = false;
+      addGeofenceAlert(logEl, zone, distM, 'exit');
+    }
+  });
+}
+
+function addGeofenceAlert(logEl, zone, distM, eventType) {
+  const gfEmptyState = document.getElementById('gfEmptyState');
+  if (gfEmptyState) gfEmptyState.style.display = 'none';
+
+  const isRestricted = zone.status === 'verified' && (zone.zoneType === 'restricted_area' || zone.zoneType === 'caution_zone');
+  const alertClass = eventType === 'exit' ? 'gf-exit' : (isRestricted ? 'gf-restricted' : (zone.zoneType === 'caution_zone' ? 'gf-caution' : 'gf-enter'));
+  const icon = eventType === 'exit' ? '🚶' : (isRestricted ? '⚠️' : '📍');
+  const label = eventType === 'enter'
+    ? (isRestricted ? 'Entering verified restricted zone' : 'Entering tourist zone')
+    : 'Exited zone';
+
+  const verifiedBadge = (zone.status === 'verified') ? '<span style="background:#dc3545;color:white;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">VERIFIED</span>' : '<span style="background:#ddd;color:#555;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">INFORMATIONAL</span>';
+
+  const div = document.createElement('div');
+  div.className = `gf-alert ${alertClass}`;
+  div.innerHTML = `
+    <div>
+      <div style="font-weight:800; margin-bottom:3px;">${icon} ${zone.name || zone.title} ${verifiedBadge}</div>
+      <div style="font-size:11px;">${label} · ${distM < 1000 ? distM.toFixed(0)+'m' : (distM/1000).toFixed(1)+'km'} away</div>
+      ${zone.zoneType ? `<div style="font-size:11px; opacity:0.8;">Zone type: ${zone.zoneType}</div>` : ''}
+      ${isRestricted && zone.restrictedReason ? `<div style="font-size:11px; color:inherit; margin-top:3px;">ℹ️ ${zone.restrictedReason}</div>` : ''}
+      <div style="font-size:10px; color:#888; margin-top:3px;">This is an informational alert. Always verify with local authorities for official restrictions.</div>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:14px;color:inherit;opacity:0.5;padding:0 4px;">✕</button>
+  `;
+  logEl.insertBefore(div, logEl.firstChild);
+}
+
+// =======================================================
+// WEATHER
+// =======================================================
+function loadWeatherForStop(tabIndex, btn) {
+  document.querySelectorAll('.dest-weather-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (tabIndex === 0) {
+    // Current location
+    if (userLat && userLon) {
+      loadWeatherForCoords(userLat, userLon, 'Your Current Location');
+    } else {
+      document.getElementById('weatherDisplay').innerHTML = `
+        <div class="weather-loading">
+          <i class="fa-solid fa-location-crosshairs me-1"></i> Enable your location first to see current weather.
+        </div>`;
+    }
+    return;
+  }
+
+  // Destination tabs
+  const lat = btn ? parseFloat(btn.dataset.lat) : null;
+  const lon = btn ? parseFloat(btn.dataset.lon) : null;
+  const name = btn ? btn.dataset.name : 'Destination';
+  if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
+    document.getElementById('weatherDisplay').innerHTML = '<div class="weather-error">No coordinates for this destination.</div>';
+    return;
+  }
+  loadWeatherForCoords(lat, lon, name);
+}
+
+const weatherCache = {};
+
+function loadWeatherForCoords(lat, lon, label) {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  if (weatherCache[key] && (Date.now() - weatherCache[key].ts < 10 * 60 * 1000)) {
+    renderWeather(weatherCache[key].data, label);
+    return;
+  }
+
+  document.getElementById('weatherDisplay').innerHTML = `
+    <div class="weather-loading"><i class="fa-solid fa-spinner fa-spin me-1"></i> Loading weather for ${label}…</div>`;
+
+  fetch(`/api/trips/weather?lat=${lat}&lon=${lon}`, { credentials: 'include' })
+    .then(r => r.json())
+    .then(data => {
+      weatherCache[key] = { data, ts: Date.now() };
+      renderWeather(data, label);
+    })
+    .catch(err => {
+      document.getElementById('weatherDisplay').innerHTML = `
+        <div class="weather-error">
+          <i class="fa-solid fa-cloud-slash me-1"></i> Weather data unavailable.<br>
+          <button onclick="loadWeatherForCoords(${lat},${lon},'${label}')" style="background:none;border:none;color:var(--tc-blue);cursor:pointer;font-size:13px;font-weight:700;margin-top:6px;">Retry</button>
+        </div>`;
+    });
+}
+
+function renderWeather(data, label) {
+  if (!data.success) {
+    document.getElementById('weatherDisplay').innerHTML = `<div class="weather-error">${data.error || 'Weather unavailable.'}</div>`;
+    return;
+  }
+
+  const cur = data.current;
+  const daily = data.daily || [];
+  const warnings = data.warnings || [];
+
+  let warningHtml = '';
+  warnings.forEach(w => {
+    const cls = w.level === 'danger' ? 'danger' : 'warning';
+    warningHtml += `<div class="alert alert-${cls} py-2 px-3 mb-2 rounded-3 small">${w.text}</div>`;
+  });
+
+  let curHtml = '';
+  if (cur) {
+    curHtml = `
+      <div class="weather-card">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="weather-icon">${cur.icon}</div>
+          <div>
+            <div class="weather-temp">${cur.temperature}°C</div>
+            <div style="font-weight:700; color:#183c2c;">${cur.description}</div>
+            <div class="weather-detail">${label}</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:12px; color:#555;">
+          <div>🌡️ Feels like<br><strong>${cur.feelsLike}°C</strong></div>
+          <div>💧 Humidity<br><strong>${cur.humidity}%</strong></div>
+          <div>💨 Wind<br><strong>${cur.windSpeed} km/h</strong></div>
+          ${cur.precipitation > 0 ? `<div>🌧️ Precipitation<br><strong>${cur.precipitation} mm</strong></div>` : ''}
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-top:8px;">Data from Open-Meteo · ${cur.time || ''} · ${data.timezone || ''}</div>
+      </div>`;
+  }
+
+  let forecastHtml = '';
+  daily.slice(0, 4).forEach(d => {
+    forecastHtml += `
+      <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f0f5f0;">
+        <div style="font-size:1.4rem;">${d.icon}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700; font-size:13px;">${d.date}</div>
+          <div style="font-size:12px; color:#888;">${d.description}</div>
+        </div>
+        <div style="text-align:right; font-size:12px;">
+          <div style="font-weight:800;">${d.maxTemp}°C</div>
+          <div style="color:#aaa;">${d.minTemp}°C</div>
+          ${d.precipitationProb > 20 ? `<div style="color:#0d6efd;">🌧️ ${d.precipitationProb}%</div>` : ''}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('weatherDisplay').innerHTML = `
+    ${warningHtml}
+    ${curHtml || '<div class="weather-error">Current conditions unavailable.</div>'}
+    ${daily.length > 0 ? `<div style="margin-top:12px; font-weight:700; font-size:13px; color:#555; margin-bottom:6px;">7-Day Forecast</div>${forecastHtml}` : ''}
+  `;
+}
+
+// =======================================================
+// TRIP PROGRESS PERSISTENCE
+// =======================================================
+function saveProgress() {
+  if (progressSaveTimer) clearTimeout(progressSaveTimer);
+  progressSaveTimer = setTimeout(() => {
+    const stop = ALL_STOPS[currentStopIdx] || ALL_STOPS[0];
+    if (!stop) return;
+    fetch(`/my-trips/${TRIP_ID}/progress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        currentDayIndex: stop.dayIndex,
+        currentActivityIndex: stop.activityIndex,
+        tripStatus: 'in_progress'
+      })
+    }).catch(console.error);
+  }, 2000);
+}
+
+function pauseTrip() {
+  if (!confirm('Pause this trip? You can resume it later from My Trips.')) return;
+  fetch(`/my-trips/${TRIP_ID}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tripStatus: 'paused' })
+  }).then(() => {
+    stopLocationTracking();
+    stopSafetyMonitoring();
+    window.location.href = '/my-trips';
+  }).catch(console.error);
+}
+
+function confirmCompleteTrip() {
+  const totalStops = ALL_STOPS.length;
+  const done = COMPLETED_IDS.length;
+  if (totalStops > 0 && done < totalStops) {
+    if (!confirm(`You have completed ${done} of ${totalStops} stops. Mark the trip as finished anyway?`)) return;
+  } else {
+    if (!confirm('Mark this trip as completed? This action cannot be undone.')) return;
+  }
+  fetch(`/my-trips/${TRIP_ID}/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      stopLocationTracking();
+      stopSafetyMonitoring();
+      alert('🎉 Trip completed! Well done on your Maharashtra adventure!');
+      window.location.href = '/my-trips';
+    }
+  }).catch(console.error);
+}
+
+// =======================================================
+// SOS MODAL
+// =======================================================
+function openSOSModal() {
+  document.getElementById('sosModalOverlay').classList.add('open');
+  document.getElementById('sosResult').style.display = 'none';
+  document.getElementById('sosFormSection').style.display = 'block';
+}
+
+function closeSOSModal() {
+  document.getElementById('sosModalOverlay').classList.remove('open');
+}
+
+document.getElementById('sosLocationConsent').addEventListener('change', function() {
+  document.getElementById('sosLocationNote').style.display = this.checked ? 'block' : 'none';
+});
+
+async function submitSOSReport() {
+  const type = document.getElementById('sosType').value;
+  const desc = document.getElementById('sosDescription').value.trim();
+  const phone = document.getElementById('sosPhone').value.trim();
+  const consent = document.getElementById('sosLocationConsent').checked;
+
+  if (!type) { alert('Please select an incident type.'); return; }
+  if (desc.length < 5) { alert('Please provide a description of at least 5 characters.'); return; }
+
+  const submitBtn = document.getElementById('sosSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Submitting…';
+
+  const payload = { incidentType: type, description: desc, locationConsent: consent };
+  if (phone) payload.userPhone = phone;
+
+  // If consent given, try to get fresh location
+  if (consent) {
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, enableHighAccuracy: true });
+      });
+      payload.latitude = pos.coords.latitude;
+      payload.longitude = pos.coords.longitude;
+      payload.accuracy = pos.coords.accuracy;
+    } catch (e) {
+      // Could not get fresh location — proceed without coordinates
+      payload.locationConsent = false;
+    }
+  }
+
+  try {
+    const res = await fetch('/incidents', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('sosRefId').textContent = data.reportId || 'N/A';
+      document.getElementById('sosFormSection').style.display = 'none';
+      document.getElementById('sosResult').style.display = 'block';
+    } else {
+      alert(`Error: ${data.error || 'Failed to submit report.'}`);
+    }
+  } catch (err) {
+    alert('Network error. Please try again or call 112 directly.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Submit Report';
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('sosModalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSOSModal();
+});
+
+// Stop tracking on page unload
+window.addEventListener('beforeunload', () => {
+  if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
+  if (safetyWatchId !== null) navigator.geolocation.clearWatch(safetyWatchId);
+});
+
+// =======================================================
+// INIT
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+
+  // Set initial stop (restore from progress or start at 0)
+  const savedDayIdx = <%= currentDayIdx %>;
+  // Find first non-completed stop matching saved day index
+  let startStopIdx = 0;
+  for (let i = 0; i < ALL_STOPS.length; i++) {
+    if (ALL_STOPS[i].dayIndex === savedDayIdx && !COMPLETED_IDS.includes(ALL_STOPS[i].activityId)) {
+      startStopIdx = i;
+      break;
+    }
+  }
+  // Also find first uncompleted stop overall
+  const firstUndone = ALL_STOPS.findIndex(s => !COMPLETED_IDS.includes(s.activityId));
+  if (firstUndone >= 0) startStopIdx = firstUndone;
+
+  goToStop(startStopIdx);
+
+  // Load weather tabs for first stop with coords
+  const firstWithCoords = ALL_STOPS.find(s => s.lat && s.lon);
+  if (firstWithCoords) {
+    const tabs = document.querySelectorAll('.dest-weather-tab');
+    if (tabs.length > 1) {
+      // Default tab is "Current Location" — weather will load when GPS is enabled
+    }
+  }
+});
+</script>

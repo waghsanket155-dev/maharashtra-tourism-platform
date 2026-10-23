@@ -1,0 +1,192 @@
+
+<% layout ("layout/boilerplate")%>
+
+<style>
+    .terms-page {
+    padding: 40px 20px;
+    background: #f5f8f5;
+    min-height: 100vh;
+}
+
+.terms-hero {
+    max-width: 900px;
+    margin: 0 auto 35px;
+    padding: 50px 20px;
+    text-align: center;
+    color: white;
+    background: linear-gradient(135deg, #1b5e20, #43a047);
+    border-radius: 20px;
+}
+
+.terms-hero h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.terms-hero p {
+    font-size: 18px;
+}
+
+.terms-content {
+    max-width: 1000px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.terms-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: 0.3s;
+}
+
+.terms-card:hover {
+    transform: translateY(-5px);
+}
+
+.terms-card h3 {
+    color: #1b5e20;
+    margin-bottom: 12px;
+}
+
+.terms-card p {
+    color: #555;
+    line-height: 1.7;
+}
+
+.terms-footer {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.terms-footer a {
+    color: #1b5e20;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+
+    .terms-content {
+        grid-template-columns: 1fr;
+    }
+
+    .terms-hero h1 {
+        font-size: 30px;
+    }
+
+}
+</style>
+
+<div class="terms-page">
+
+    <div class="terms-hero">
+        <h1>📜 Terms & Conditions</h1>
+        <p>
+            Simple guidelines for a safe, enjoyable and responsible
+            Maharashtra travel experience.
+        </p>
+    </div>
+
+    <div class="terms-content">
+
+        <div class="terms-card">
+            <h3>🌄 1. Using Our Platform</h3>
+            <p>
+                Maharashtra Tourism provides information, travel
+                recommendations, maps and tourism-related services.
+                By using this platform, you agree to follow these terms.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>👤 2. User Account</h3>
+            <p>
+                Users are responsible for providing accurate information
+                while creating an account and for keeping their login
+                credentials secure.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>🗺️ 3. Travel Information</h3>
+            <p>
+                Destination information, routes, timings and recommendations
+                are provided for general guidance. Actual conditions may
+                change due to weather, traffic, government rules or other factors.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>🤖 4. AI Recommendations</h3>
+            <p>
+                AI-generated itineraries and recommendations are intended
+                to assist travellers. Users should verify important information
+                before making travel decisions.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>📍 5. Location & Safety</h3>
+            <p>
+                Location-based features may be used to provide routes,
+                nearby attractions and safety alerts. Users should not rely
+                solely on the platform during emergencies.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>💳 6. Bookings & Payments</h3>
+            <p>
+                If third-party booking or payment services are used,
+                their respective terms and conditions may also apply.
+                Users should review the details before confirming a booking.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>🚫 7. Prohibited Activities</h3>
+            <p>
+                Users must not misuse the platform, submit false information,
+                attempt unauthorized access, or use the service for illegal
+                activities.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>⚠️ 8. Limitation of Responsibility</h3>
+            <p>
+                We aim to provide accurate and useful information, but we
+                cannot guarantee that all information will always be complete,
+                current or error-free.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>🔄 9. Changes to Terms</h3>
+            <p>
+                We may update these Terms & Conditions when required.
+                Continued use of the platform after changes means that
+                you accept the updated terms.
+            </p>
+        </div>
+
+        <div class="terms-card">
+            <h3>📩 10. Contact Us</h3>
+            <p>
+                If you have questions regarding these Terms & Conditions,
+                please contact us through our Contact Us page.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="terms-footer">
+        <p>🌿 Explore Maharashtra • Travel Responsibly • Create Memories</p>
+        <a href="/home">← Back to Home</a>
+    </div>
+
+</div>

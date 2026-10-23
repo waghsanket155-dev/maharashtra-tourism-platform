@@ -1,0 +1,456 @@
+ <% layout("layout/boilerplate") %>
+ 
+ <style>
+    body {
+      background: #f5f8f5;
+      color: #26352b;
+      font-family: Arial, sans-serif;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #124b2b, #269653);
+      color: white;
+      padding: 65px 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 15px auto 0;
+      line-height: 1.8;
+    }
+
+    .section-heading {
+      color: #176638;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .step-card, .feature-card, .info-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      height: 100%;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+      border: 1px solid #e6eee7;
+    }
+
+    .step-number {
+      background: #198754;
+      color: white;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .feature-icon {
+      font-size: 35px;
+      margin-bottom: 12px;
+    }
+
+    .step-card h4, .feature-card h4 {
+      color: #185d35;
+      font-weight: 700;
+    }
+
+    .step-card p, .feature-card p, .info-panel p {
+      line-height: 1.75;
+      color: #526057;
+    }
+
+    .notice {
+      background: #e7f5eb;
+      border-left: 5px solid #198754;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .footer {
+      background: #124b2b;
+      color: white;
+      padding: 24px;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .btn-explore {
+      background: white;
+      color: #176638;
+      font-weight: bold;
+      padding: 12px 25px;
+      border-radius: 30px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 24px;
+    }
+
+    .btn-explore:hover {
+      background: #e6f4e9;
+      color: #124b2b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1>How Maharashtra Tourism Works</h1>
+
+      <p>
+        Your step-by-step guide to discovering beautiful destinations,
+        planning your journey, organizing trips, and accessing tourist
+        safety features across Maharashtra.
+      </p>
+
+      <a href="/explore" class="btn-explore">
+        Start Exploring Maharashtra →
+      </a>
+    </div>
+  </header>
+
+  <main class="container py-5">
+
+    <!-- Introduction -->
+    <section class="mb-5">
+      <h2 class="section-heading">What Is This Platform?</h2>
+
+      <p>
+        Maharashtra Tourism is a digital tourism platform that brings
+        destination discovery, trip planning, route assistance, and
+        tourist safety tools together in one place. It is designed
+        for people who want to explore Maharashtra's forts, temples,
+        historical monuments, wildlife destinations, beaches, and
+        natural attractions.
+      </p>
+
+      <p>
+        Instead of collecting all your travel information from
+        different places, you can use the application's available
+        features to prepare and organize your journey.
+      </p>
+    </section>
+
+    <!-- Getting Started -->
+    <section class="mb-5">
+      <h2 class="section-heading">How to Use the Application</h2>
+
+      <p class="text-secondary mb-4">
+        Follow these steps to get started with your tourism journey.
+      </p>
+
+      <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h4>Create an Account</h4>
+            <p>
+              Sign up and log in if the feature you want requires an
+              account. Your account allows you to access the
+              application's login-protected features.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h4>Explore Destinations</h4>
+            <p>
+              Open the destination or Explore section. Browse
+              available places and read their descriptions, locations,
+              categories, and other information provided by the system.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h4>Choose Your Places</h4>
+            <p>
+              Select destinations based on your interests, such as
+              history, spirituality, nature, wildlife, adventure,
+              or cultural experiences.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h4>Plan Your Trip</h4>
+            <p>
+              Use the manual planner to organize your chosen places,
+              or use the AI trip planner if available to generate
+              a suggested itinerary based on your travel preferences.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">5</div>
+            <h4>Review Your Journey</h4>
+            <p>
+              Review your planned destinations and itinerary.
+              Where supported, check route directions, distances,
+              estimated travel times, and other trip details.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="step-card">
+            <div class="step-number">6</div>
+            <h4>Travel with Safety Tools</h4>
+            <p>
+              Visit the Safety section to learn about available
+              safety tools. If implemented, enable location monitoring
+              with your consent, review geo-fence alerts, and use
+              SOS incident reporting when needed.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Feature explanations -->
+    <section class="mb-5">
+      <h2 class="section-heading">Understand Each Feature</h2>
+
+      <p class="text-secondary mb-4">
+        Learn what each module does and how it can help you.
+      </p>
+
+      <div class="row g-4">
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">🏞️</div>
+            <h4>1. Explore Maharashtra</h4>
+            <p>
+              Discover tourist attractions across different districts.
+              Destination information helps you learn about a place
+              before deciding whether to visit it.
+            </p>
+            <p>
+              <strong>Example:</strong> A traveller interested in
+              history can explore Ajanta Caves, Ellora Caves, and
+              Maharashtra's famous forts.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h4>2. AI Trip Planner</h4>
+            <p>
+              Enter your starting city, number of days, travel budget,
+              interests, and preferred travel method. The system can
+              use these preferences to suggest a suitable itinerary,
+              when AI planning is available.
+            </p>
+            <p>
+              <strong>Example:</strong> A user planning a two-day
+              historical trip can request a suggested schedule for
+              visiting selected attractions.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">🗓️</div>
+            <h4>3. Manual Trip Planner</h4>
+            <p>
+              Choose the destinations you want to visit and organize
+              your trip according to your own preferences. This is
+              useful when you already know where you want to go.
+            </p>
+            <p>
+              <strong>Example:</strong> Add Ellora Caves and
+              Grishneshwar Temple to your travel plan.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">📍</div>
+            <h4>4. Route and Location Assistance</h4>
+            <p>
+              Where integrated, map and GPS features help you identify
+              your location and access directions between destinations.
+              Travel-time and distance information can help you prepare
+              your schedule.
+            </p>
+            <p>
+              <strong>Example:</strong> Check directions from your
+              starting point to the first destination and then to
+              your next planned stop.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h4>5. Tourist Safety and Geo-Fencing</h4>
+            <p>
+              Geo-fencing uses a virtual boundary around a defined
+              geographical area. With the necessary permissions and
+              working GPS integration, the application can detect
+              relevant boundary events and show configured alerts.
+            </p>
+            <p>
+              <strong>Example:</strong> If a configured restricted
+              zone is entered, the system may display a warning
+              according to its implemented rules.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">🚨</div>
+            <h4>6. SOS and Incident Reporting</h4>
+            <p>
+              The incident reporting feature allows a user to submit
+              information about a safety concern through the supported
+              reporting workflow.
+            </p>
+            <p>
+              <strong>Example:</strong> A traveller can submit an
+              incident report when they need to communicate a problem.
+              An in-app report does not automatically mean emergency
+              services have been contacted.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h4>7. Saved Trips</h4>
+            <p>
+              Where enabled, save your planned itinerary and return
+              to it later to review the destinations and travel
+              schedule without preparing the same plan again.
+            </p>
+            <p>
+              <strong>Example:</strong> Save a weekend trip and open
+              the saved plan when you are ready to review it.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h4>8. Admin Dashboard</h4>
+            <p>
+              Authorized administrators can manage destination
+              information and maintain the tourism data displayed
+              to users, according to their assigned permissions.
+            </p>
+            <p>
+              <strong>Example:</strong> An administrator can add
+              a new tourist destination if the relevant management
+              feature is available.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Example journey -->
+    <section class="mb-5">
+      <h2 class="section-heading">Example: A Tourist's Journey</h2>
+
+      <div class="info-panel mt-3">
+        <p>
+          Imagine that a family wants to visit Chhatrapati Sambhajinagar
+          for a weekend.
+        </p>
+
+        <ol class="mb-0">
+          <li class="mb-2">
+            They explore the available destinations on the platform.
+          </li>
+          <li class="mb-2">
+            They choose places that match their interests.
+          </li>
+          <li class="mb-2">
+            They use the manual planner or AI planner to organize
+            their visit.
+          </li>
+          <li class="mb-2">
+            They review the suggested itinerary and available
+            directions before travelling.
+          </li>
+          <li class="mb-2">
+            They review the Safety section and grant location
+            permission only if they choose to use location-based
+            functionality.
+          </li>
+          <li>
+            They keep their itinerary available and enjoy exploring
+            the region.
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="mb-5">
+      <h2 class="section-heading">Your Privacy and Safety</h2>
+
+      <div class="notice">
+        <p class="mb-2">
+          <strong>Your location should be used with your consent.</strong>
+        </p>
+        <p class="mb-0">
+          Location-based safety features may require GPS access and
+          browser permission. Review the permission request before
+          allowing access. GPS and browser permissions alone do not
+          guarantee continuous monitoring, automatic emergency
+          response, or contact with authorities. These capabilities
+          depend on the application's implementation and available
+          services.
+        </p>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="text-center py-4">
+      <h2 class="section-heading">Ready to Explore Maharashtra?</h2>
+
+      <p class="text-secondary">
+        Discover new destinations, prepare your itinerary, and make
+        your travel planning easier with the tools available on
+        this platform.
+      </p>
+
+      <a href="/explore" class="btn btn-success btn-lg mt-3">
+        Explore Destinations
+      </a>
+    </section>
+
+  </main>

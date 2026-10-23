@@ -1,0 +1,171 @@
+<% layout ("layout/boilerplate")%>
+
+<style>
+    .privacy-page {
+    padding: 40px 20px;
+    background: #f5f8f5;
+    min-height: 100vh;
+}
+
+.privacy-hero {
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+    padding: 50px 20px;
+    background: linear-gradient(135deg, #1b5e20, #43a047);
+    color: white;
+    border-radius: 20px;
+    margin-bottom: 35px;
+}
+
+.privacy-hero h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.privacy-hero p {
+    font-size: 18px;
+    opacity: 0.95;
+}
+
+.privacy-content {
+    max-width: 1000px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.privacy-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.privacy-card:hover {
+    transform: translateY(-5px);
+}
+
+.privacy-card h3 {
+    color: #1b5e20;
+    margin-bottom: 12px;
+}
+
+.privacy-card p {
+    color: #555;
+    line-height: 1.7;
+}
+
+.privacy-footer {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.privacy-footer a {
+    color: #1b5e20;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+
+    .privacy-content {
+        grid-template-columns: 1fr;
+    }
+
+    .privacy-hero h1 {
+        font-size: 30px;
+    }
+
+}
+</style>
+
+
+<div class="privacy-page">
+
+    <div class="privacy-hero">
+        <h1>🔐 Your Privacy Matters</h1>
+        <p>
+            Explore Maharashtra with confidence. 
+            We respect your privacy while you discover new places.
+        </p>
+    </div>
+
+    <div class="privacy-content">
+
+        <div class="privacy-card">
+            <h3>🌿 What We Collect</h3>
+            <p>
+                We may collect basic information such as your name, email,
+                travel preferences and location when you use our tourism services.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>🗺️ Your Location</h3>
+            <p>
+                With your permission, location information may be used to
+                provide maps, nearby attractions, route suggestions and
+                geo-fencing safety features.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>🤖 AI Recommendations</h3>
+            <p>
+                Our platform may use your selected interests and preferences
+                to generate personalized travel recommendations and itineraries.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>🔒 Data Protection</h3>
+            <p>
+                We take reasonable security measures to protect your
+                information from unauthorized access or misuse.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>💳 Secure Transactions</h3>
+            <p>
+                Payment-related information is handled through secure
+                third-party payment services. We do not unnecessarily store
+                sensitive payment details.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>🤝 Third-Party Services</h3>
+            <p>
+                Our platform may integrate maps, booking services,
+                payment gateways and other external services.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>🛡️ Your Choice</h3>
+            <p>
+                You can choose whether to share optional information such as
+                location access and personalized travel preferences.
+            </p>
+        </div>
+
+        <div class="privacy-card">
+            <h3>📩 Contact Us</h3>
+            <p>
+                Have a question about your privacy?
+                Contact our team through the Contact Us page.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="privacy-footer">
+        <p>🌄 Travel • Discover • Experience Maharashtra</p>
+        <a href="/home">← Back to Home</a>
+    </div>
+
+</div>

@@ -1,0 +1,1360 @@
+<% layout("layout/boilerplate") %>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root {
+    --primary-green: #198754;
+    --dark-green: #11643e;
+    --light-green: #e8f6ef;
+    --danger-red: #dc3545;
+    --warning-amber: #ffc107;
+    --card-shadow: 0 10px 30px rgba(18, 60, 43, 0.08);
+  }
+
+  .safety-hero {
+    background: linear-gradient(135deg, #126b47 0%, #198754 50%, #0d6efd 100%);
+    color: white;
+    padding: 2.5rem 1.5rem;
+    border-radius: 24px;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 35px rgba(25, 135, 84, 0.22);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .safety-hero::after {
+    content: "🛡️";
+    position: absolute;
+    right: 20px;
+    bottom: -15px;
+    font-size: 110px;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .safety-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid rgba(25, 135, 84, 0.12);
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .safety-title {
+    color: #123c2b;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #eef6f2;
+    padding-bottom: 0.65rem;
+  }
+
+  .safety-title i {
+    color: var(--primary-green);
+  }
+
+  /* Status Indicators */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 750;
+  }
+
+  .status-active {
+    background: #e8f6ef;
+    color: #126b47;
+    border: 1px solid #b8e6cf;
+  }
+
+  .status-inactive {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+  }
+
+  .pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #198754;
+    display: inline-block;
+    box-shadow: 0 0 0 rgba(25, 135, 84, 0.4);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+  }
+
+  .dot-inactive {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #adb5bd;
+    display: inline-block;
+  }
+
+  /* SOS Big Button */
+  .sos-banner-card {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+    border: 2px solid #ffc9c9;
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.12);
+  }
+
+  .btn-sos {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    color: white !important;
+    font-size: 1.25rem;
+    font-weight: 900;
+    padding: 14px 32px;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.35);
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-sos:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 30px rgba(220, 53, 69, 0.45);
+  }
+
+  /* Map Container */
+  #safetyMap {
+    height: 320px;
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid #dce8e1;
+    z-index: 1;
+  }
+
+  /* Geofence Badges */
+  .zone-badge-verified {
+    background: #e7f5ea;
+    color: #198754;
+    border: 1px solid #c2e5d3;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+
+  .zone-badge-unverified {
+    background: #f1f3f5;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+
+  .zone-badge-caution {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+
+  .zone-badge-restricted {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+
+  /* Alert Log */
+  .alert-log-item {
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-size: 0.88rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid;
+  }
+
+  .alert-log-enter {
+    background: #e8f6ef;
+    border-left-color: #198754;
+    color: #126b47;
+  }
+
+  .alert-log-exit {
+    background: #f8f9fa;
+    border-left-color: #6c757d;
+    color: #495057;
+  }
+
+  .alert-log-caution {
+    background: #fff8e6;
+    border-left-color: #ffc107;
+    color: #856404;
+  }
+
+  .alert-log-restricted {
+    background: #fff0f1;
+    border-left-color: #dc3545;
+    color: #721c24;
+  }
+
+  /* Helpline pill buttons */
+  .helpline-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 750;
+    text-decoration: none;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #212529;
+    transition: all 0.2s ease;
+  }
+
+  .helpline-btn:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    border-color: #198754;
+    color: #198754;
+  }
+
+  .helpline-btn.emergency {
+    background: #fff5f5;
+    border-color: #ffc9c9;
+    color: #dc3545;
+  }
+  .helpline-btn.emergency:hover {
+    background: #dc3545;
+    color: white;
+  }
+</style>
+
+<div class="container py-4">
+
+  <!-- ========================================== -->
+  <!-- 1. HERO HEADER                             -->
+  <!-- ========================================== -->
+  <div class="safety-hero">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h1 class="fw-bold mb-2">
+          🛡️ Tourist Safety & Geo-Fence Monitoring
+        </h1>
+        <p class="mb-0 opacity-90 fs-6">
+          Real-time local safety assistance across Maharashtra. Receive informational alerts when approaching tourist destinations, trek points, or caution zones, and file verified SOS incident reports directly to our safety team.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="/my-incidents" class="btn btn-light text-success fw-bold me-2 px-3 py-2 shadow-sm rounded-pill">
+          <i class="fa-solid fa-list-check me-1"></i> My Reports
+        </a>
+        <a href="#emergencyHelplines" class="btn btn-outline-light fw-bold px-3 py-2 rounded-pill">
+          <i class="fa-solid fa-phone me-1"></i> Helplines
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY EXPLANATION NOTICE -->
+  <div class="alert alert-light border border-success-subtle rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-start gap-3">
+      <i class="fa-solid fa-shield-cat text-success fs-3 mt-1"></i>
+      <div>
+        <h6 class="fw-bold text-dark mb-1">Your Privacy & Consent First</h6>
+        <p class="small text-muted mb-0">
+          <strong>GPS monitoring is OFF by default.</strong> When you start monitoring, coordinates are calculated <em>strictly locally in your browser</em> to determine distances to tourist zones. Your live coordinates are <strong>never continuously uploaded, logged, or shared</strong>. Coordinates are only submitted if you explicitly choose to attach them to a verified SOS report.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- ========================================== -->
+    <!-- LEFT COLUMN: CONTROLS & LIVE MONITORING    -->
+    <!-- ========================================== -->
+    <div class="col-lg-7">
+
+      <!-- DASHBOARD CONTROLS CARD -->
+      <div class="safety-card">
+        <div class="safety-title">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <span>GPS Monitoring Dashboard</span>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <span class="small text-muted d-block mb-1">Monitoring State</span>
+              <div id="monitoringStatusBadge" class="status-pill status-inactive">
+                <span class="dot-inactive"></span>
+                <span>Inactive (Stopped)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <span class="small text-muted d-block mb-1">Browser Permission</span>
+              <div id="permissionStatusBadge" class="status-pill status-inactive">
+                <i class="fa-solid fa-lock"></i>
+                <span>Not Requested</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <span class="small text-muted d-block mb-1">GPS Accuracy</span>
+              <strong id="gpsAccuracyText" class="text-secondary">—</strong>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <span class="small text-muted d-block mb-1">Last Position Update</span>
+              <strong id="lastUpdateText" class="text-secondary">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls: Start & Stop Monitoring -->
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" id="startMonitoringBtn" class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm" onclick="startSafetyMonitoring()">
+            <i class="fa-solid fa-play me-2"></i> Start Monitoring
+          </button>
+          <button type="button" id="stopMonitoringBtn" class="btn btn-outline-danger fw-bold px-4 py-2 rounded-pill" onclick="stopSafetyMonitoring()" disabled>
+            <i class="fa-solid fa-stop me-2"></i> Stop Monitoring
+          </button>
+        </div>
+
+        <div id="gpsAlertBox" class="alert alert-warning mt-3 py-2 px-3 small d-none" role="alert">
+          <span id="gpsAlertMessage"></span>
+        </div>
+      </div>
+
+      <!-- CURRENT LOCATION & INTERACTIVE MAP -->
+      <div class="safety-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+          <div class="safety-title mb-0 border-0 p-0">
+            <i class="fa-solid fa-map-pin"></i>
+            <span>Current Location & Nearby Map</span>
+          </div>
+          <div id="coordsDisplay" class="small text-muted font-monospace">
+            Lat: — | Lng: —
+          </div>
+        </div>
+
+        <!-- Interactive Leaflet Map -->
+        <!-- Safety Verification Notice Banner -->
+        <div id="safetyDisclaimerBanner" class="alert alert-warning py-2 px-3 small rounded-3 mb-3 border border-warning-subtle">
+          <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>
+          <strong>Safety Verification Notice:</strong> GPS monitoring is inactive. Proximity to restricted areas and hazards cannot be evaluated. The absence of alerts does not mean an area is safe.
+        </div>
+
+        <!-- Interactive Leaflet Map -->
+        <div id="safetyMap" class="mb-3"></div>
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="small text-muted">
+            <i class="fa-solid fa-circle-info text-success me-1"></i>
+            Map displays your location and circular Geo-Fences of eligible tourist destinations.
+          </div>
+          <a id="googleMapsLink" href="#" target="_blank" class="btn btn-sm btn-outline-success rounded-pill d-none">
+            <i class="fa-brands fa-google me-1"></i> View in Google Maps
+          </a>
+        </div>
+      </div>
+
+      <!-- ACTIVE GEOFENCE & HISTORY CARD -->
+      <div class="safety-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+          <div class="safety-title mb-0 border-0 p-0">
+            <i class="fa-solid fa-bell"></i>
+            <span>Geo-Fence Alerts & Activity</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" onclick="clearAlertHistory()" title="Clear alert history">
+            Clear Log
+          </button>
+        </div>
+
+        <!-- Currently Active Zone Banner -->
+        <div id="activeZoneBanner" class="alert alert-success d-none mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-location-crosshairs fs-4 text-success"></i>
+            <div>
+              <strong id="activeZoneName">You are inside a tourist zone</strong>
+              <div class="small" id="activeZoneDesc"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-time Alert Log History -->
+        <div id="alertHistoryList" style="max-height: 240px; overflow-y: auto;">
+          <div class="text-center py-4 text-muted small" id="noAlertsMsg">
+            <i class="fa-regular fa-bell-slash fs-4 d-block mb-1"></i>
+            No alerts yet. Start monitoring to receive alerts as you approach tourist areas.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- RIGHT COLUMN: SOS & EMERGENCY RESOURCES    -->
+    <!-- ========================================== -->
+    <div class="col-lg-5">
+
+      <!-- SOS INCIDENT REPORT BANNER -->
+      <div class="sos-banner-card mb-4">
+        <div class="mb-2">
+          <span class="badge bg-danger px-3 py-1 rounded-pill uppercase fw-bold">Emergency Assistance</span>
+        </div>
+        <h4 class="fw-bold text-danger mb-2">Need Help or Reporting an Incident?</h4>
+        <p class="small text-muted mb-3">
+          Submit an official incident report to Maharashtra Tourism safety officers. You can optionally attach verified GPS coordinates.
+        </p>
+
+        <button type="button" class="btn btn-sos w-100 justify-content-center" onclick="openSOSModal()">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Trigger SOS Incident Report
+        </button>
+
+        <div class="small text-danger fw-semibold mt-2">
+          ⚠️ Not a replacement for local police/112 in immediate life danger.
+        </div>
+      </div>
+
+      <!-- NEARBY GEOFENCED DESTINATIONS -->
+      <div class="safety-card mb-4">
+        <div class="safety-title">
+          <i class="fa-solid fa-compass"></i>
+          <span>Nearby Configured Tourist Zones</span>
+          <span class="badge bg-success-subtle text-success ms-auto" id="zoneCountBadge">0</span>
+        </div>
+
+        <p class="small text-muted mb-2">
+          Destinations configured with Geo-Fencing. Distances update dynamically while monitoring is active.
+        </p>
+
+        <div id="nearbyZonesList" style="max-height: 300px; overflow-y: auto;">
+          <div class="text-center py-3 text-muted small">
+            Loading destination zones...
+          </div>
+        </div>
+      </div>
+
+      <!-- VERIFIED EMERGENCY HELPLINES (REQUIREMENT 10) -->
+      <div class="safety-card" id="emergencyHelplines">
+        <div class="safety-title">
+          <i class="fa-solid fa-phone-volume"></i>
+          <span>Verified Government Helplines</span>
+        </div>
+
+        <p class="small text-muted mb-3">
+          Direct emergency helpline contacts across Maharashtra and India. Click on supported mobile devices to dial immediately:
+        </p>
+
+        <div class="d-flex flex-column gap-2">
+          <a href="tel:112" class="helpline-btn emergency justify-content-between">
+            <span><i class="fa-solid fa-phone me-2"></i><strong>112</strong> — National Emergency (All-in-One)</span>
+            <span class="badge bg-danger">24x7</span>
+          </a>
+
+          <a href="tel:100" class="helpline-btn emergency justify-content-between">
+            <span><i class="fa-solid fa-shield me-2"></i><strong>100</strong> — Police Control Room</span>
+            <span class="badge bg-danger">24x7</span>
+          </a>
+
+          <a href="tel:108" class="helpline-btn justify-content-between">
+            <span><i class="fa-solid fa-truck-medical me-2 text-danger"></i><strong>108</strong> — Medical Ambulance</span>
+            <span class="badge bg-secondary">Maharashtra</span>
+          </a>
+
+          <a href="tel:1363" class="helpline-btn justify-content-between">
+            <span><i class="fa-solid fa-headset me-2 text-success"></i><strong>1363</strong> — Tourist Infoline & Assistance</span>
+            <span class="badge bg-success">Toll Free</span>
+          </a>
+
+          <a href="tel:1091" class="helpline-btn justify-content-between">
+            <span><i class="fa-solid fa-person-dress me-2 text-warning"></i><strong>1091</strong> — Women Helpline</span>
+            <span class="badge bg-secondary">24x7</span>
+          </a>
+
+          <a href="tel:1077" class="helpline-btn justify-content-between">
+            <span><i class="fa-solid fa-cloud-bolt me-2 text-info"></i><strong>1077</strong> — Disaster Management Helpline</span>
+            <span class="badge bg-secondary">District</span>
+          </a>
+        </div>
+
+        <div class="small text-muted mt-3 border-top pt-2">
+          <i class="fa-solid fa-circle-check text-success me-1"></i>
+          Emergency numbers are verified national and Maharashtra state hotlines.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ======================================================== -->
+<!-- SOS INCIDENT REPORT MODAL (REQUIREMENTS 4 & 5)           -->
+<!-- ======================================================== -->
+<div class="modal fade" id="sosModal" tabindex="-1" aria-labelledby="sosModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow">
+      
+      <div class="modal-header bg-danger text-white rounded-top-4 py-3">
+        <h5 class="modal-title fw-bold" id="sosModalLabel">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          Submit SOS Incident Report
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="sosIncidentForm" onsubmit="submitSOSReport(event)">
+        <div class="modal-body p-4">
+
+          <!-- Important Disclaimer -->
+          <div class="alert alert-warning border border-warning-subtle small mb-3">
+            <strong><i class="fa-solid fa-circle-exclamation me-1"></i> Important:</strong> Submitting this report records an incident with Maharashtra Tourism safety officers and administrators. <em>It does not automatically dispatch an emergency vehicle or contact local police directly.</em> For immediate physical danger, dial <strong>112</strong> immediately.
+          </div>
+
+          <div class="row g-3">
+
+            <!-- Incident Type -->
+            <div class="col-md-6">
+              <label for="incidentType" class="form-label fw-bold small">
+                Incident Category <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="incidentType" name="incidentType" required>
+                <option value="">-- Select Incident Category --</option>
+                <option value="medical_emergency">🩺 Medical Emergency</option>
+                <option value="lost_tourist">🧭 Lost or Separated Tourist</option>
+                <option value="harassment_safety">🛡️ Harassment or Personal Safety Concern</option>
+                <option value="accident_injury">🩹 Accident or Injury</option>
+                <option value="unsafe_restricted_area">⚠️ Unsafe or Restricted Area Encounter</option>
+                <option value="lost_belongings">🧳 Lost Essential Belongings (Passport/Wallet)</option>
+                <option value="other">📋 Other Tourist Incident</option>
+              </select>
+            </div>
+
+            <!-- Contact Phone -->
+            <div class="col-md-6">
+              <label for="contactPhone" class="form-label fw-bold small">
+                Your Contact Phone (Optional)
+              </label>
+              <input type="tel" class="form-control" id="contactPhone" name="phone" placeholder="e.g. +91 98765 43210">
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <label for="incidentDescription" class="form-label fw-bold small">
+                Describe the Situation / Details <span class="text-danger">*</span>
+              </label>
+              <textarea class="form-control" id="incidentDescription" name="description" rows="4" minlength="5" maxlength="2000" placeholder="Please describe what happened, your current location or landmarks, and any immediate assistance needed..." required></textarea>
+              <div class="form-text small">Minimum 5 characters. Provide as much relevant detail as possible.</div>
+            </div>
+
+            <!-- EXPLICIT LOCATION CONSENT SECTION (SECTION 2 & 5) -->
+            <div class="col-12">
+              <div class="p-3 bg-light rounded-3 border">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="attachLocationConsent" name="locationConsent" onchange="toggleLocationAttachment(this)">
+                  <label class="form-check-label fw-bold text-dark" for="attachLocationConsent">
+                    Attach my current GPS location to this report
+                  </label>
+                </div>
+                <div class="small text-muted mt-1 ps-4" id="locationConsentHelp">
+                  Checking this attaches your current latitude, longitude, accuracy, and capture timestamp to this specific report so administrators can locate you.
+                </div>
+
+                <!-- Coords Preview inside Modal -->
+                <div id="modalLocationPreview" class="mt-2 ps-4 small font-monospace text-success d-none">
+                  <i class="fa-solid fa-location-crosshairs me-1"></i>
+                  <span id="modalCoordsText">Capturing location...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmation Checkbox -->
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="confirmTruth" required>
+                <label class="form-check-label small text-muted" for="confirmTruth">
+                  I confirm that this report is submitted in good faith and the information provided is accurate to the best of my knowledge.
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div id="modalFormError" class="alert alert-danger mt-3 small d-none" role="alert"></div>
+
+        </div>
+
+        <div class="modal-footer bg-light py-2 px-4 rounded-bottom-4">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" id="submitSOSBtn" class="btn btn-danger fw-bold rounded-pill px-4">
+            <i class="fa-solid fa-paper-plane me-1"></i> Submit Report
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ======================================================== -->
+<!-- CLIENT-SIDE GEOLOCATION & GEOFENCING SCRIPT              -->
+<!-- ======================================================== -->
+<script>
+  // State variables
+  let isMonitoring = false;
+  let watchId = null;
+  let currentCoords = null; // { lat, lng, accuracy, timestamp }
+  let destinationZones = [];
+  let activeZonesSet = new Set(); // Stores IDs of zones currently inside
+  let leafletMap = null;
+  let userMarker = null;
+  let accuracyCircle = null;
+  let zoneLayers = [];
+
+  // HTML sanitization helper to prevent XSS (Feature 6)
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    const div = document.createElement("div");
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  // Ray-casting algorithm for Point-in-Polygon evaluation
+  function isPointInPolygon(point, polygon) {
+    const x = point[0], y = point[1];
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i][0], yi = polygon[i][1];
+      const xj = polygon[j][0], yj = polygon[j][1];
+      const intersect = ((yi > y) !== (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // Initialize page
+  document.addEventListener("DOMContentLoaded", function () {
+    initLeafletMap();
+    fetchGeofenceZones();
+
+    // Clean up when leaving or closing the page
+    window.addEventListener("beforeunload", cleanupWatcher);
+    window.addEventListener("pagehide", cleanupWatcher);
+  });
+
+  function cleanupWatcher() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+  }
+
+  // ========================================================
+  // 1. LEAFLET MAP INITIALIZATION
+  // ========================================================
+  function initLeafletMap() {
+    leafletMap = L.map('safetyMap').setView([19.7515, 75.7139], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(leafletMap);
+  }
+
+  // ========================================================
+  // 2. FETCH DESTINATION GEOFENCES FROM BACKEND
+  // ========================================================
+  async function fetchGeofenceZones() {
+    const listEl = document.getElementById('nearbyZonesList');
+    try {
+      const res = await fetch('/api/safety/geofences');
+      if (!res.ok) {
+        throw new Error("HTTP error " + res.status);
+      }
+      const data = await res.json();
+
+      const rawZones = Array.isArray(data) ? data : (data.zones || []);
+      if (data.success !== false && rawZones) {
+        destinationZones = rawZones;
+        document.getElementById('zoneCountBadge').innerText = destinationZones.length;
+        renderNearbyZonesList();
+        renderMapZoneCircles();
+      } else {
+        throw new Error(data.error || "Failed to load safety zones.");
+      }
+    } catch (err) {
+      console.error("Error loading geofence zones:", err);
+      listEl.innerHTML =
+        '<div class="alert alert-danger py-2 px-3 small mb-0"><i class="fa-solid fa-circle-exclamation me-1"></i> <strong>Error:</strong> Unable to load safety zones. Proximity alerts cannot verify your safety.</div>';
+      
+      const banner = document.getElementById('safetyDisclaimerBanner');
+      if (banner) {
+        banner.className = "alert alert-danger py-2 px-3 small rounded-3 mb-3 border border-danger-subtle";
+        banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Safety Service Unavailable:</strong> Geo-fence zone data could not be loaded from the server. Never assume an area is safe when zone data is missing.';
+      }
+    }
+  }
+
+  function renderMapZoneCircles() {
+    if (!leafletMap) return;
+
+    // Clear previous zone layers
+    zoneLayers.forEach(layer => leafletMap.removeLayer(layer));
+    zoneLayers = [];
+
+    destinationZones.forEach(zone => {
+      if (zone.latitude && zone.longitude) {
+        const isRestricted = zone.zoneType === "restricted_area";
+        const isCaution = zone.zoneType === "caution_zone";
+
+        // Verified restricted areas distinctly in red, caution in amber/orange, safe in green
+        const color = isRestricted ? "#dc3545" : (isCaution ? "#fd7e14" : "#198754");
+        const fillColor = isRestricted ? "#dc3545" : (isCaution ? "#ffc107" : "#198754");
+        const fillOpacity = isRestricted ? 0.22 : (isCaution ? 0.18 : 0.14);
+
+        let shapeLayer = null;
+
+        // Where exact official boundaries are irregular and polygon geometry is available, render polygon
+        if (zone.geometry && zone.geometry.type === "Polygon" && Array.isArray(zone.geometry.coordinates)) {
+          shapeLayer = L.polygon(zone.geometry.coordinates, {
+            color: color,
+            weight: 2,
+            fillColor: fillColor,
+            fillOpacity: fillOpacity
+          }).addTo(leafletMap);
+        } else {
+          // Circular radius geofencing
+          shapeLayer = L.circle([zone.latitude, zone.longitude], {
+            color: color,
+            weight: 2,
+            fillColor: fillColor,
+            fillOpacity: fillOpacity,
+            radius: zone.radius || 400
+          }).addTo(leafletMap);
+        }
+
+        const safeName = escapeHtml(zone.name);
+        const safeDistrict = escapeHtml(zone.district);
+        const safeType = isRestricted ? "Restricted Area (Prohibited)" : (isCaution ? "Caution Advisory Zone" : "Safe Zone");
+        const typeBadge = isRestricted
+          ? '<span class="badge bg-danger">⛔ Restricted Area</span>'
+          : (isCaution ? '<span class="badge bg-warning text-dark">⚠️ Caution Zone</span>' : '<span class="badge bg-success">✅ Safe Zone</span>');
+
+        let popupContent = '<div style="min-width: 200px;">' +
+          '<strong>📍 ' + safeName + '</strong><br>' +
+          '<span class="text-muted small">' + safeDistrict + '</span><br>' +
+          '<div class="my-1">' + typeBadge + ' <span class="badge bg-light text-dark border">Radius: ' + escapeHtml(zone.radius) + 'm</span></div>';
+
+        if (zone.restrictedReason) {
+          popupContent += '<div class="alert alert-danger py-1 px-2 mt-1 mb-1 small" style="font-size: 0.75rem;">' +
+            '<strong>Reason:</strong> ' + escapeHtml(zone.restrictedReason) + '</div>';
+        }
+
+        if (zone.sourceName) {
+          popupContent += '<div class="small text-muted mt-1" style="font-size: 0.72rem;">' +
+            'Source: ' + escapeHtml(zone.sourceName);
+          if (zone.notificationNumber) {
+            popupContent += ' (' + escapeHtml(zone.notificationNumber) + ')';
+          }
+          popupContent += '</div>';
+        }
+
+        if (zone.sourceUrl) {
+          popupContent += '<div class="mt-1"><a href="' + escapeHtml(zone.sourceUrl) + '" target="_blank" rel="noopener noreferrer" class="small text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Official Notification</a></div>';
+        }
+
+        popupContent += '</div>';
+
+        shapeLayer.bindPopup(popupContent);
+        zoneLayers.push(shapeLayer);
+      }
+    });
+  }
+
+  // ========================================================
+  // 3. START & STOP GPS MONITORING
+  // ========================================================
+  function startSafetyMonitoring() {
+    if (!navigator.geolocation) {
+      showGpsAlert("Your browser does not support geolocation.");
+      return;
+    }
+
+    hideGpsAlert();
+
+    document.getElementById('permissionStatusBadge').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Requesting Permission...';
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 3000
+    };
+
+    watchId = navigator.geolocation.watchPosition(
+      onGpsSuccess,
+      onGpsError,
+      options
+    );
+
+    isMonitoring = true;
+    document.getElementById('startMonitoringBtn').disabled = true;
+    document.getElementById('stopMonitoringBtn').disabled = false;
+
+    const banner = document.getElementById('safetyDisclaimerBanner');
+    if (banner) {
+      banner.className = "alert alert-success py-2 px-3 small rounded-3 mb-3 border border-success-subtle";
+      banner.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i> <strong>Active Geo-Fence Protection:</strong> Proximity to official restricted areas and caution zones is actively evaluated locally in your browser.';
+    }
+  }
+
+  function stopSafetyMonitoring() {
+    cleanupWatcher();
+    isMonitoring = false;
+
+    // Reset zone-tracking state completely
+    activeZonesSet.clear();
+
+    document.getElementById('startMonitoringBtn').disabled = false;
+    document.getElementById('stopMonitoringBtn').disabled = true;
+
+    document.getElementById('monitoringStatusBadge').className = "status-pill status-inactive";
+    document.getElementById('monitoringStatusBadge').innerHTML = '<span class="dot-inactive"></span> Inactive (Stopped)';
+
+    document.getElementById('coordsDisplay').innerText = "Lat: — | Lng: —";
+    document.getElementById('gpsAccuracyText').innerText = "—";
+    document.getElementById('googleMapsLink').classList.add("d-none");
+    document.getElementById('activeZoneBanner').classList.add("d-none");
+
+    if (userMarker && leafletMap) {
+      leafletMap.removeLayer(userMarker);
+      userMarker = null;
+    }
+    if (accuracyCircle && leafletMap) {
+      leafletMap.removeLayer(accuracyCircle);
+      accuracyCircle = null;
+    }
+
+    const banner = document.getElementById('safetyDisclaimerBanner');
+    if (banner) {
+      banner.className = "alert alert-warning py-2 px-3 small rounded-3 mb-3 border border-warning-subtle";
+      banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>Safety Monitoring Stopped:</strong> GPS tracking is currently inactive. Proximity alerts cannot verify your safety.';
+    }
+
+    addAlertLog("GPS Monitoring stopped by user. Proximity tracking reset.", "exit");
+    renderNearbyZonesList();
+  }
+
+  // ========================================================
+  // 4. GPS SUCCESS HANDLER
+  // ========================================================
+  function onGpsSuccess(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const accuracy = Math.round(position.coords.accuracy);
+    const now = new Date();
+
+    currentCoords = {
+      lat: lat,
+      lng: lng,
+      accuracy: accuracy,
+      timestamp: now
+    };
+
+    document.getElementById('monitoringStatusBadge').className = "status-pill status-active";
+    document.getElementById('monitoringStatusBadge').innerHTML = '<span class="pulse-dot"></span> Active (Monitoring)';
+
+    document.getElementById('permissionStatusBadge').className = "status-pill status-active";
+    document.getElementById('permissionStatusBadge').innerHTML = '<i class="fa-solid fa-check"></i> Granted';
+
+    document.getElementById('gpsAccuracyText').innerText = "±" + accuracy + " meters";
+    document.getElementById('lastUpdateText').innerText = now.toLocaleTimeString();
+
+    document.getElementById('coordsDisplay').innerText = "Lat: " + lat.toFixed(5) + " | Lng: " + lng.toFixed(5);
+
+    const gmapsLink = document.getElementById('googleMapsLink');
+    gmapsLink.href = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng;
+    gmapsLink.classList.remove('d-none');
+
+    // Update Leaflet User Marker distinctly from geofence circles
+    if (leafletMap) {
+      const userLatLng = [lat, lng];
+
+      // Custom pulsing blue icon for user current location
+      const userIcon = L.divIcon({
+        className: 'user-location-marker-wrapper',
+        html: '<div style="background-color: #0d6efd; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(13,110,253,0.8); animation: pulse 1.5s infinite;"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      if (!userMarker) {
+        userMarker = L.marker(userLatLng, {
+          icon: userIcon,
+          title: "Your Location",
+          zIndexOffset: 1000
+        }).addTo(leafletMap);
+        userMarker.bindPopup("<strong>📍 You are here</strong><br><small>GPS Accuracy: ±" + accuracy + "m</small>");
+        leafletMap.setView(userLatLng, 13);
+      } else {
+        userMarker.setLatLng(userLatLng);
+      }
+
+      if (!accuracyCircle) {
+        accuracyCircle = L.circle(userLatLng, {
+          radius: accuracy,
+          color: '#0d6efd',
+          fillColor: '#0d6efd',
+          fillOpacity: 0.08,
+          weight: 1,
+          dashArray: '4, 4'
+        }).addTo(leafletMap);
+      } else {
+        accuracyCircle.setLatLng(userLatLng);
+        accuracyCircle.setRadius(accuracy);
+      }
+    }
+
+    // Evaluate Geo-Fences
+    evaluateGeofences(lat, lng);
+  }
+
+  // ========================================================
+  // 5. GPS ERROR HANDLER
+  // ========================================================
+  function onGpsError(error) {
+    let msg = "";
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        msg = "Location permission denied in browser. Please enable location permissions in browser settings.";
+        document.getElementById('permissionStatusBadge').className = "status-pill status-inactive";
+        document.getElementById('permissionStatusBadge').innerHTML = '<i class="fa-solid fa-ban text-danger"></i> Denied';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        msg = "GPS position is currently unavailable. Please check your device location sensor.";
+        break;
+      case error.TIMEOUT:
+        msg = "Location request timed out. Retrying in background...";
+        break;
+      default:
+        msg = "An unknown error occurred while retrieving location.";
+        break;
+    }
+
+    showGpsAlert(msg);
+
+    const banner = document.getElementById('safetyDisclaimerBanner');
+    if (banner) {
+      banner.className = "alert alert-danger py-2 px-3 small rounded-3 mb-3 border border-danger-subtle";
+      banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> <strong>GPS Unavailable:</strong> ' + escapeHtml(msg) + ' Proximity alerts cannot verify your safety.';
+    }
+  }
+
+  function showGpsAlert(msg) {
+    const box = document.getElementById('gpsAlertBox');
+    document.getElementById('gpsAlertMessage').innerText = msg;
+    box.classList.remove('d-none');
+  }
+
+  function hideGpsAlert() {
+    document.getElementById('gpsAlertBox').classList.add('d-none');
+  }
+
+  // ========================================================
+  // 6. HAVERSINE FORMULA & GEOFENCE EVALUATION
+  // ========================================================
+  function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Earth radius in meters
+    const toRad = x => (x * Math.PI) / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const rLat1 = toRad(lat1);
+    const rLat2 = toRad(lat2);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(rLat1) * Math.cos(rLat2) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function evaluateGeofences(userLat, userLng) {
+    let currentlyInsideAny = false;
+    let insideZoneTitle = "";
+    let insideZoneDesc = "";
+
+    destinationZones.forEach(zone => {
+      if (!zone.latitude || !zone.longitude) return;
+
+      const dist = calculateHaversineDistance(userLat, userLng, zone.latitude, zone.longitude);
+      zone.currentDistance = dist;
+
+      const radius = zone.radius || 400;
+      const exitThreshold = radius + 35; // Hysteresis buffer to prevent alert flickering
+
+      const zoneId = String(zone.id || zone._id);
+      const wasInside = activeZonesSet.has(zoneId);
+
+      // Check polygon boundary or circular radius
+      let isInside = dist <= radius;
+      if (zone.geometry && zone.geometry.type === "Polygon" && Array.isArray(zone.geometry.coordinates)) {
+        isInside = isPointInPolygon([userLng, userLat], zone.geometry.coordinates);
+      }
+
+      if (isInside) {
+        currentlyInsideAny = true;
+        insideZoneTitle = zone.name;
+
+        // ENTER EVENT: Trigger once, prevent duplicate alerts during continuous watch
+        if (!wasInside) {
+          activeZonesSet.add(zoneId);
+
+          let logType = "enter";
+          let alertMsg = "Entered tourist area: " + zone.name + " (" + Math.round(dist) + "m from center)";
+
+          if (zone.zoneType === "restricted_area") {
+            logType = "restricted";
+            alertMsg = "⚠️ Entered restricted area: " + zone.name + ". " + (zone.restrictedReason || "Permits and legal restrictions apply.");
+          } else if (zone.zoneType === "caution_zone") {
+            logType = "caution";
+            alertMsg = "⚠️ Entered caution advisory area: " + zone.name + ". " + (zone.restrictedReason || "Caution advised.");
+          } else {
+            alertMsg = "📍 Entered tourist zone: " + zone.name + " (Radius: " + radius + "m).";
+          }
+
+          addAlertLog(alertMsg, logType);
+        }
+
+        insideZoneDesc = "Distance from center: " + Math.round(dist) + "m | Radius: " + radius + "m";
+        if (zone.restrictedReason) {
+          insideZoneDesc += " — Note: " + zone.restrictedReason;
+        }
+
+      } else if (dist > exitThreshold && wasInside) {
+        // EXIT EVENT with hysteresis: Trigger once when clearing exit threshold
+        activeZonesSet.delete(zoneId);
+        addAlertLog("Exited zone: " + zone.name + " (Current distance: " + (dist / 1000).toFixed(2) + " km).", "exit");
+      }
+    });
+
+    // Update Active Zone Banner
+    const banner = document.getElementById('activeZoneBanner');
+    if (currentlyInsideAny) {
+      document.getElementById('activeZoneName').innerText = "You are inside: " + insideZoneTitle;
+      document.getElementById('activeZoneDesc').innerText = insideZoneDesc;
+      banner.classList.remove('d-none');
+    } else {
+      banner.classList.add('d-none');
+    }
+
+    renderNearbyZonesList();
+  }
+
+  // ========================================================
+  // 7. ALERT LOGGING (XSS-Safe DOM construction)
+  // ========================================================
+  function addAlertLog(msg, type) {
+    const list = document.getElementById('alertHistoryList');
+    const noAlerts = document.getElementById('noAlertsMsg');
+    if (noAlerts) noAlerts.remove();
+
+    let cssClass = "alert-log-enter";
+    let iconClass = "fa-circle-check";
+
+    if (type === "exit") {
+      cssClass = "alert-log-exit";
+      iconClass = "fa-person-walking-arrow-right";
+    } else if (type === "caution") {
+      cssClass = "alert-log-caution";
+      iconClass = "fa-triangle-exclamation";
+    } else if (type === "restricted") {
+      cssClass = "alert-log-restricted";
+      iconClass = "fa-ban";
+    }
+
+    const timeStr = new Date().toLocaleTimeString();
+
+    const item = document.createElement("div");
+    item.className = "alert-log-item " + cssClass;
+
+    const leftCol = document.createElement("div");
+    const icon = document.createElement("i");
+    icon.className = "fa-solid " + iconClass + " me-2";
+    const textSpan = document.createElement("span");
+    textSpan.textContent = msg;
+
+    leftCol.appendChild(icon);
+    leftCol.appendChild(textSpan);
+
+    const timeSmall = document.createElement("small");
+    timeSmall.className = "opacity-75 ms-2 text-nowrap";
+    timeSmall.textContent = timeStr;
+
+    item.appendChild(leftCol);
+    item.appendChild(timeSmall);
+
+    list.insertBefore(item, list.firstChild);
+  }
+
+  function clearAlertHistory() {
+    const list = document.getElementById('alertHistoryList');
+    list.innerHTML = "";
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "text-center py-4 text-muted small";
+    emptyDiv.id = "noAlertsMsg";
+    emptyDiv.innerHTML = '<i class="fa-regular fa-bell-slash fs-4 d-block mb-1"></i> Alert history cleared for this session.';
+    list.appendChild(emptyDiv);
+  }
+
+  // ========================================================
+  // 8. RENDER NEARBY ZONES LIST (XSS-Safe)
+  // ========================================================
+  function renderNearbyZonesList() {
+    const container = document.getElementById('nearbyZonesList');
+    if (!destinationZones || destinationZones.length === 0) {
+      container.innerHTML = '<div class="text-muted small py-2">No active safety zones available.</div>';
+      return;
+    }
+
+    const sorted = [...destinationZones];
+    if (currentCoords) {
+      sorted.sort((a, b) => (a.currentDistance || 9999999) - (b.currentDistance || 9999999));
+    }
+
+    container.innerHTML = "";
+
+    sorted.slice(0, 10).forEach(zone => {
+      let distanceText = "";
+      if (zone.currentDistance !== undefined) {
+        if (zone.currentDistance < 1000) {
+          distanceText = Math.round(zone.currentDistance) + "m away";
+        } else {
+          distanceText = (zone.currentDistance / 1000).toFixed(1) + "km away";
+        }
+      }
+
+      let badgeHtml = '<span class="zone-badge-verified">✓ Safe Zone</span>';
+      if (zone.zoneType === "restricted_area") {
+        badgeHtml = '<span class="zone-badge-restricted">⛔ Restricted Area</span>';
+      } else if (zone.zoneType === "caution_zone") {
+        badgeHtml = '<span class="zone-badge-caution">⚠️ Caution Advised</span>';
+      }
+
+      const card = document.createElement("div");
+      card.className = "p-2 mb-2 bg-light rounded-3 border d-flex justify-content-between align-items-center";
+
+      const leftDiv = document.createElement("div");
+      const strongName = document.createElement("strong");
+      strongName.className = "d-block text-dark small text-truncate";
+      strongName.style.maxWidth = "220px";
+      strongName.title = zone.name;
+      strongName.textContent = "📍 " + zone.name;
+
+      const subText = document.createElement("small");
+      subText.className = "text-muted";
+      subText.textContent = (zone.district || "") + " · Radius: " + (zone.radius || 0) + "m";
+
+      leftDiv.appendChild(strongName);
+      leftDiv.appendChild(subText);
+
+      if (zone.restrictedReason) {
+        const reasonDiv = document.createElement("div");
+        reasonDiv.className = "text-danger small";
+        reasonDiv.style.fontSize = "0.75rem";
+        reasonDiv.textContent = zone.restrictedReason;
+        leftDiv.appendChild(reasonDiv);
+      }
+
+      const rightDiv = document.createElement("div");
+      rightDiv.className = "text-end";
+      rightDiv.innerHTML = badgeHtml;
+
+      if (distanceText) {
+        const distDiv = document.createElement("div");
+        distDiv.className = "small fw-bold text-success mt-1";
+        distDiv.textContent = distanceText;
+        rightDiv.appendChild(distDiv);
+      }
+
+      card.appendChild(leftDiv);
+      card.appendChild(rightDiv);
+      container.appendChild(card);
+    });
+  }
+
+  // ========================================================
+  // 9. SOS EMERGENCY REPORT WORKFLOW
+  // ========================================================
+  function openSOSModal() {
+    const modalEl = document.getElementById('sosModal');
+    const modal = new bootstrap.Modal(modalEl);
+
+    document.getElementById('modalFormError').classList.add('d-none');
+    document.getElementById('attachLocationConsent').checked = false;
+    document.getElementById('modalLocationPreview').classList.add('d-none');
+
+    modal.show();
+  }
+
+  function toggleLocationAttachment(checkbox) {
+    const preview = document.getElementById('modalLocationPreview');
+    const previewText = document.getElementById('modalCoordsText');
+
+    if (checkbox.checked) {
+      if (currentCoords) {
+        previewText.textContent = "Lat: " + currentCoords.lat.toFixed(5) + ", Lng: " + currentCoords.lng.toFixed(5) + " (±" + currentCoords.accuracy + "m captured at " + currentCoords.timestamp.toLocaleTimeString() + ")";
+        preview.classList.remove('d-none');
+      } else {
+        previewText.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Requesting fresh location with your consent...';
+        preview.classList.remove('d-none');
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              currentCoords = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                accuracy: Math.round(pos.coords.accuracy),
+                timestamp: new Date()
+              };
+              previewText.textContent = "Lat: " + currentCoords.lat.toFixed(5) + ", Lng: " + currentCoords.lng.toFixed(5) + " (±" + currentCoords.accuracy + "m)";
+            },
+            err => {
+              previewText.textContent = "⚠️ Location unavailable (" + err.message + "). Report will be sent without coordinates.";
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        } else {
+          previewText.textContent = "Geolocation not supported on this browser.";
+        }
+      }
+    } else {
+      preview.classList.add('d-none');
+    }
+  }
+
+  async function submitSOSReport(event) {
+    event.preventDefault();
+    const errorBox = document.getElementById('modalFormError');
+    errorBox.classList.add('d-none');
+
+    const incidentType = document.getElementById('incidentType').value;
+    const description = document.getElementById('incidentDescription').value.trim();
+    const phone = document.getElementById('contactPhone').value.trim();
+    const locationConsent = document.getElementById('attachLocationConsent').checked;
+
+    if (!incidentType) {
+      errorBox.textContent = "Please select an incident category.";
+      errorBox.classList.remove('d-none');
+      return;
+    }
+
+    if (!description || description.length < 5) {
+      errorBox.textContent = "Please enter an incident description (at least 5 characters).";
+      errorBox.classList.remove('d-none');
+      return;
+    }
+
+    const payload = {
+      incidentType: incidentType,
+      description: description,
+      phone: phone,
+      locationConsent: locationConsent
+    };
+
+    if (locationConsent && currentCoords) {
+      payload.latitude = currentCoords.lat;
+      payload.longitude = currentCoords.lng;
+      payload.accuracy = currentCoords.accuracy;
+      payload.capturedAt = currentCoords.timestamp.toISOString();
+    }
+
+    const submitBtn = document.getElementById('submitSOSBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Submitting Report...';
+
+    try {
+      const res = await fetch('/incidents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const modalEl = document.getElementById('sosModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        alert("✅ SOS Incident Report Submitted!\n\nReference ID: " + data.reportId + "\n\nOur safety team has logged your report. You can track this report anytime under 'My Incidents'.\n\nFor immediate emergency, please dial 112 directly.");
+        window.location.href = "/my-incidents";
+      } else {
+        errorBox.textContent = data.error || "Failed to submit report. Please try again or dial 112.";
+        errorBox.classList.remove('d-none');
+      }
+    } catch (err) {
+      console.error("SOS submission error:", err);
+      errorBox.textContent = "Network error. Please try again or call 112 directly.";
+      errorBox.classList.remove('d-none');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Submit Report';
+    }
+  }
+</script>

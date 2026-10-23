@@ -1,0 +1,319 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .admin-dashboard-page {
+    max-width: 1240px;
+    margin: 25px auto 80px;
+    padding: 0 15px;
+  }
+
+  .admin-hero {
+    background: linear-gradient(135deg, #183c2c 0%, #198754 100%);
+    color: white;
+    padding: 2.25rem 2rem;
+    border-radius: 22px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 30px rgba(24, 60, 44, 0.2);
+  }
+
+  .stat-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    height: 100%;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.15);
+    border-color: #a3d4be;
+  }
+
+  .stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .action-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e0eee7;
+    padding: 1.75rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .action-btn-custom {
+    padding: 0.85rem 1.25rem;
+    font-weight: 600;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .action-btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  }
+</style>
+
+<div class="admin-dashboard-page">
+
+  <!-- HERO BANNER -->
+  <div class="admin-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-gauge-high me-1"></i> Control Center
+      </div>
+      <h2 class="fw-bold mb-1">Maharashtra Tourism Admin</h2>
+      <p class="mb-0 opacity-90 small">
+        Centralized operations: destinations directory, user administration, geo-safety zones, and emergency SOS reports.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/admin/new" class="btn btn-warning text-dark fw-bold rounded-pill px-4 py-2 shadow-sm">
+        <i class="fa-solid fa-plus me-1"></i> Add Place
+      </a>
+      <a href="/safety" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-satellite-dish me-1"></i> Live Safety
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS TILES -->
+  <div class="row g-3 mb-4">
+
+    <!-- Places Card -->
+    <div class="col-lg col-md-4 col-sm-6">
+      <a href="/places" class="stat-card-link">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="text-muted small fw-bold text-uppercase">Destinations</span>
+              <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalPlaces || 0 %></h3>
+            </div>
+            <div class="stat-icon bg-success-subtle text-success">
+              <i class="fa-solid fa-mountain-sun"></i>
+            </div>
+          </div>
+          <div class="small text-success fw-semibold mt-2">
+            <i class="fa-solid fa-arrow-right me-1"></i> Manage places
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Users Card -->
+    <div class="col-lg col-md-4 col-sm-6">
+      <a href="/admin/users" class="stat-card-link">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="text-muted small fw-bold text-uppercase">Users</span>
+              <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalUsers || 0 %></h3>
+            </div>
+            <div class="stat-icon bg-primary-subtle text-primary">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="small text-primary fw-semibold mt-2">
+            <i class="fa-solid fa-arrow-right me-1"></i> Manage users
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Bookings / Trips Card -->
+    <div class="col-lg col-md-4 col-sm-6">
+      <a href="/my-trips" class="stat-card-link">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="text-muted small fw-bold text-uppercase">Saved Trips</span>
+              <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalBookings || 0 %></h3>
+            </div>
+            <div class="stat-icon bg-info-subtle text-info">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+          </div>
+          <div class="small text-info fw-semibold mt-2">
+            <i class="fa-solid fa-arrow-right me-1"></i> View itineraries
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Safety Zones Card -->
+    <div class="col-lg col-md-6 col-sm-6">
+      <a href="/admin/safety-zones" class="stat-card-link">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="text-muted small fw-bold text-uppercase">Safety Zones</span>
+              <h3 class="fw-bold text-dark mt-1 mb-0"><%= typeof totalSafetyZones !== 'undefined' ? totalSafetyZones : (pendingSafetyZones || 0) %></h3>
+            </div>
+            <div class="stat-icon bg-warning-subtle text-warning">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+          </div>
+          <div class="small text-warning-emphasis fw-semibold mt-2">
+            <% if (typeof pendingSafetyZones !== 'undefined' && pendingSafetyZones > 0) { %>
+              <span class="badge bg-warning text-dark"><%= pendingSafetyZones %> pending</span>
+            <% } else { %>
+              <i class="fa-solid fa-arrow-right me-1"></i> Manage zones
+            <% } %>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Incidents Card -->
+    <div class="col-lg col-md-6 col-sm-12">
+      <a href="/admin/incidents" class="stat-card-link">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="text-muted small fw-bold text-uppercase">Incidents / SOS</span>
+              <h3 class="fw-bold text-danger mt-1 mb-0"><%= totalIncidents || 0 %></h3>
+            </div>
+            <div class="stat-icon bg-danger-subtle text-danger">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+          <div class="small text-danger fw-semibold mt-2">
+            <i class="fa-solid fa-arrow-right me-1"></i> Review reports
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- QUICK ACTIONS PANEL -->
+  <div class="action-card mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">
+        <i class="fa-solid fa-bolt text-warning me-2"></i> Quick Administrative Actions
+      </h5>
+      <span class="text-muted small">All systems operational</span>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- Add Tourist Place -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/admin/new" class="btn btn-success action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-plus-circle fs-5"></i>
+          <span>Add Tourist Place</span>
+        </a>
+      </div>
+
+      <!-- Manage Places -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/places" class="btn btn-outline-dark action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-map-location-dot fs-5 text-success"></i>
+          <span>Manage Destinations</span>
+          <span class="badge bg-success-subtle text-success ms-auto"><%= totalPlaces || 0 %></span>
+        </a>
+      </div>
+
+      <!-- Manage Users -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/admin/users" class="btn btn-outline-primary action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-users-gear fs-5"></i>
+          <span>Manage Users</span>
+          <span class="badge bg-primary-subtle text-primary ms-auto"><%= totalUsers || 0 %></span>
+        </a>
+      </div>
+
+      <!-- Manage Safety Zones -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/admin/safety-zones" class="btn btn-outline-warning text-dark action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-shield-halved fs-5 text-warning"></i>
+          <span>Manage Safety Zones</span>
+          <% if (typeof pendingSafetyZones !== 'undefined' && pendingSafetyZones > 0) { %>
+            <span class="badge bg-warning text-dark ms-auto"><%= pendingSafetyZones %> pending</span>
+          <% } %>
+        </a>
+      </div>
+
+      <!-- Manage Incidents -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/admin/incidents" class="btn btn-outline-danger action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-triangle-exclamation fs-5 text-danger"></i>
+          <span>Manage Incidents</span>
+          <% if (typeof totalIncidents !== 'undefined' && totalIncidents > 0) { %>
+            <span class="badge bg-danger ms-auto"><%= totalIncidents %></span>
+          <% } %>
+        </a>
+      </div>
+
+      <!-- Tourist Safety View -->
+      <div class="col-md-4 col-sm-6">
+        <a href="/safety" class="btn btn-outline-success action-btn-custom w-100 justify-content-center">
+          <i class="fa-solid fa-satellite-dish fs-5"></i>
+          <span>Tourist Safety View</span>
+          <i class="fa-solid fa-arrow-up-right-from-square ms-auto small text-muted"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NAVIGATION HELPER -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 16px;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="p-3 bg-light rounded-circle text-success fs-4">
+            <i class="fa-solid fa-compass"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1">Tourist Portal Preview</h6>
+            <p class="text-muted small mb-0">Browse Maharashtra destination catalog from the traveler's perspective.</p>
+          </div>
+          <a href="/explore" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            Explore
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 16px;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="p-3 bg-light rounded-circle text-primary fs-4">
+            <i class="fa-solid fa-route"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1">Trip Itinerary Engine</h6>
+            <p class="text-muted small mb-0">Test AI planner and manual trip customizer workflows.</p>
+          </div>
+          <a href="/manual-planner" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            Planner
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

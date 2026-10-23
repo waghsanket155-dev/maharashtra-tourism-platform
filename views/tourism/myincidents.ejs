@@ -1,0 +1,175 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .incidents-page {
+    max-width: 1000px;
+    margin: 30px auto 80px;
+    padding: 0 15px;
+  }
+
+  .page-header-box {
+    background: linear-gradient(135deg, #126b47 0%, #198754 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.18);
+  }
+
+  .incident-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e0eee7;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .incident-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(18, 60, 43, 0.08);
+  }
+
+  .status-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    font-weight: 700;
+  }
+
+  .status-badge-inprogress {
+    background: #cff4fc;
+    color: #055160;
+    border: 1px solid #b6effb;
+    font-weight: 700;
+  }
+
+  .status-badge-resolved {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    font-weight: 700;
+  }
+
+  .status-badge-rejected {
+    background: #e2e3e5;
+    color: #41464b;
+    border: 1px solid #d3d6d8;
+    font-weight: 700;
+  }
+
+  .empty-incidents-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 2px dashed #c8e8d6;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    margin: 2rem auto;
+  }
+</style>
+
+<div class="incidents-page">
+
+  <!-- HEADER -->
+  <div class="page-header-box d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        My Incident Reports
+      </h2>
+      <p class="mb-0 opacity-90 small">
+        Track the status of all SOS and safety reports you have filed with Maharashtra Tourism.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/safety" class="btn btn-light text-success fw-bold rounded-pill px-3 py-2 shadow-sm">
+        <i class="fa-solid fa-shield-halved me-1"></i> Safety Dashboard
+      </a>
+    </div>
+  </div>
+
+  <% if (!incidents || incidents.length === 0) { %>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-incidents-card">
+      <div class="fs-1 mb-2">📋</div>
+      <h4 class="fw-bold text-dark mb-2">No Incident Reports Filed</h4>
+      <p class="text-muted small mb-4" style="max-width: 480px; margin: auto;">
+        You have not submitted any safety incident or SOS reports. Our safety team is available 24/7 through the Tourist Safety dashboard if you ever need assistance.
+      </p>
+      <a href="/safety" class="btn btn-success fw-bold rounded-pill px-4 py-2">
+        <i class="fa-solid fa-shield-halved me-1"></i> Go to Safety Dashboard
+      </a>
+    </div>
+
+  <% } else { %>
+
+    <!-- INCIDENTS LIST -->
+    <div class="incidents-list">
+      <% incidents.forEach(inc => { 
+          let statusClass = "status-badge-pending";
+          if (inc.status === "In Progress") statusClass = "status-badge-inprogress";
+          else if (inc.status === "Resolved") statusClass = "status-badge-resolved";
+          else if (inc.status === "Rejected") statusClass = "status-badge-rejected";
+
+          const typeMap = {
+            medical_emergency: "🩺 Medical Emergency",
+            lost_tourist: "🧭 Lost or Separated Tourist",
+            harassment_safety: "🛡️ Harassment / Personal Safety",
+            accident_injury: "🩹 Accident or Injury",
+            unsafe_restricted_area: "⚠️ Unsafe / Restricted Area",
+            lost_belongings: "🧳 Lost Belongings",
+            other: "📋 Other Incident"
+          };
+          const formattedType = typeMap[inc.incidentType] || inc.incidentType;
+      %>
+
+        <div class="incident-card">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+            <div>
+              <span class="badge <%= statusClass %> px-2 py-1 rounded-pill me-2">
+                <%= inc.status %>
+              </span>
+              <strong class="font-monospace text-dark fs-6"><%= inc.reportId %></strong>
+            </div>
+            <div class="small text-muted">
+              <i class="fa-regular fa-clock me-1"></i>
+              <%= inc.createdAt ? new Date(inc.createdAt).toLocaleString() : 'N/A' %>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+            <div>
+              <div class="fw-bold text-dark mb-1">
+                <%= formattedType %>
+              </div>
+              <p class="text-muted small mb-0 text-truncate" style="max-width: 600px;">
+                <%= inc.description %>
+              </p>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <% if (inc.locationConsent && inc.location && inc.location.latitude) { %>
+                <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                  <i class="fa-solid fa-location-dot me-1"></i> GPS Attached
+                </span>
+              <% } else { %>
+                <span class="badge bg-secondary-subtle text-secondary border small">
+                  <i class="fa-solid fa-location-slash me-1"></i> No Location
+                </span>
+              <% } %>
+
+              <a href="/my-incidents/<%= inc._id %>" class="btn btn-sm btn-outline-success rounded-pill fw-semibold px-3">
+                View Details <i class="fa-solid fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      <% }) %>
+    </div>
+
+  <% } %>
+
+</div>

@@ -1,0 +1,265 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .admin-users-page {
+    max-width: 1240px;
+    margin: 25px auto 80px;
+    padding: 0 15px;
+  }
+
+  .admin-header-box {
+    background: linear-gradient(135deg, #183c2c 0%, #198754 100%);
+    color: white;
+    padding: 2.25rem 2rem;
+    border-radius: 22px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 30px rgba(24, 60, 44, 0.2);
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .table-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e0eee7;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    background: linear-gradient(135deg, #20c997 0%, #0d6efd 100%);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  }
+
+  .user-avatar.admin-avatar {
+    background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+  }
+</style>
+
+<div class="admin-users-page">
+
+  <!-- HEADER -->
+  <div class="admin-header-box d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-users-gear me-1"></i> User Management
+      </div>
+      <h2 class="fw-bold mb-1">Registered Users & Admins</h2>
+      <p class="mb-0 opacity-90 small">
+        View registered accounts, manage administrative roles, and secure access permissions.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/dashboard" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-gauge me-1"></i> Dashboard
+      </a>
+      <a href="/places" class="btn btn-warning text-dark fw-bold rounded-pill px-3 py-2 shadow-sm">
+        <i class="fa-solid fa-map-location-dot me-1"></i> Manage Places
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4 col-sm-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Total Users</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= totalUsers || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-primary fs-4">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 col-sm-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Administrators</span>
+            <h3 class="fw-bold text-danger mt-1 mb-0"><%= adminCount || 0 %></h3>
+          </div>
+          <div class="p-3 bg-danger-subtle rounded-circle text-danger fs-4">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 col-sm-12">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Standard Users</span>
+            <h3 class="fw-bold text-success mt-1 mb-0"><%= regularUsersCount || 0 %></h3>
+          </div>
+          <div class="p-3 bg-success-subtle rounded-circle text-success fs-4">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE CONTAINER -->
+  <div class="table-card">
+
+    <!-- Filter & Search Bar -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-3 border-bottom">
+      <h5 class="fw-bold text-dark mb-0">
+        <i class="fa-solid fa-address-book text-success me-2"></i> All Registered Accounts (<%= users.length %>)
+      </h5>
+
+      <form method="GET" action="/admin/users" class="d-flex gap-2 flex-wrap">
+        <input 
+          type="text" 
+          name="search" 
+          class="form-control form-control-sm" 
+          placeholder="Search by username or email..." 
+          value="<%= search || '' %>"
+          style="width: 250px;"
+        >
+        
+        <select name="role" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+          <option value="all" <%= currentRole === 'all' ? 'selected' : '' %>>All Roles</option>
+          <option value="admin" <%= currentRole === 'admin' ? 'selected' : '' %>>Admins Only</option>
+          <option value="user" <%= currentRole === 'user' ? 'selected' : '' %>>Regular Users</option>
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-success px-3">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <% if (search || (currentRole && currentRole !== 'all')) { %>
+          <a href="/admin/users" class="btn btn-sm btn-outline-secondary">Reset</a>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr class="small text-uppercase text-secondary">
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>User ID</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!users || users.length === 0) { %>
+            <tr>
+              <td colspan="5" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-user-slash fs-3 d-block mb-2"></i>
+                No users found matching your search.
+              </td>
+            </tr>
+          <% } else { %>
+            <% users.forEach(u => { %>
+              <% const isCurrentUser = currentlogin && currentlogin._id.toString() === u._id.toString(); %>
+              <% const isAdmin = u.role === 'admin'; %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar <%= isAdmin ? 'admin-avatar' : '' %>">
+                      <%= (u.username || 'U').charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <strong class="text-dark d-block">
+                        <%= u.username %>
+                        <% if (isCurrentUser) { %>
+                          <span class="badge bg-secondary ms-1 small">You</span>
+                        <% } %>
+                      </strong>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="text-muted">
+                    <i class="fa-regular fa-envelope me-1"></i><%= u.email || 'No email registered' %>
+                  </span>
+                </td>
+
+                <td>
+                  <% if (isAdmin) { %>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill">
+                      <i class="fa-solid fa-shield-halved me-1"></i> Admin
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                      <i class="fa-solid fa-user me-1"></i> Tourist / User
+                    </span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <span class="small font-monospace text-muted">
+                    <%= u._id %>
+                  </span>
+                </td>
+
+                <td class="text-end">
+                  <div class="d-flex gap-2 justify-content-end align-items-center">
+                    <% if (isCurrentUser) { %>
+                      <span class="badge bg-light text-muted border px-2 py-1">Active Session</span>
+                    <% } else { %>
+                      <!-- Role Toggle Form -->
+                      <form action="/admin/users/<%= u._id %>/role" method="POST" class="d-inline m-0">
+                        <input type="hidden" name="role" value="<%= isAdmin ? 'user' : 'admin' %>">
+                        <% if (isAdmin) { %>
+                          <button type="submit" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-2" title="Demote to Regular User" onclick="return confirm('Demote <%= u.username %> to standard user role?');">
+                            <i class="fa-solid fa-user-minus me-1"></i> Demote
+                          </button>
+                        <% } else { %>
+                          <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Promote to Administrator" onclick="return confirm('Promote <%= u.username %> to Administrator?');">
+                            <i class="fa-solid fa-user-shield me-1"></i> Make Admin
+                          </button>
+                        <% } %>
+                      </form>
+
+                      <!-- Delete User Form -->
+                      <form action="/admin/users/<%= u._id %>/delete" method="POST" class="d-inline m-0" onsubmit="return confirm('Are you sure you want to permanently delete user account: <%= u.username %>? This cannot be undone.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete User Account">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

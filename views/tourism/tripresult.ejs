@@ -1,0 +1,717 @@
+<% layout ("layout/boilerplate")%>
+
+<style>
+  :root {
+    --primary-green: #198754;
+    --dark-green: #11643e;
+    --light-green: #e8f6ef;
+    --border-color: #e2eee7;
+  }
+
+  body {
+    background: #f7faf8;
+    color: #26352e;
+  }
+
+  .trip-container {
+    max-width: 1100px;
+    margin: 35px auto 80px;
+    padding: 0 15px;
+  }
+
+  /* HERO HEADER */
+  .trip-hero {
+    background: linear-gradient(135deg, #126b47 0%, #198754 60%, #20c997 100%);
+    color: white;
+    padding: 38px 30px;
+    border-radius: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 35px rgba(25, 135, 84, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .trip-hero h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 850;
+    margin-bottom: 12px;
+  }
+
+  .trip-hero-summary {
+    line-height: 1.65;
+    opacity: 0.95;
+    font-size: 1.05rem;
+    max-width: 800px;
+    margin-bottom: 18px;
+  }
+
+  .meta-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .meta-pill {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* PERSONAL NOTES CARD */
+  .notes-card {
+    background: #fffdf5;
+    border: 1px solid #fae8b6;
+    border-radius: 18px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.03);
+  }
+
+  .notes-title {
+    color: #855700;
+    font-weight: 750;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* DAY SECTION */
+  .day-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 25px rgba(18, 60, 43, 0.06);
+    border: 1px solid var(--border-color);
+  }
+
+  .day-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eef6f2;
+    padding-bottom: 15px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .day-card-title {
+    color: #123c2b;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .day-card-title span.badge-num {
+    background: var(--primary-green);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  .day-date-badge {
+    background: #eef8f3;
+    color: #198754;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid #c8e8d6;
+  }
+
+  /* ACTIVITY TIMELINE */
+  .activity-item {
+    border-left: 3px solid #198754;
+    padding: 0 0 25px 22px;
+    margin-left: 10px;
+    position: relative;
+  }
+
+  .activity-item:last-child {
+    padding-bottom: 5px;
+    border-left-color: transparent;
+  }
+
+  .activity-item::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 2px;
+    width: 15px;
+    height: 15px;
+    background: #198754;
+    border-radius: 50%;
+    border: 3px solid #e8f6ef;
+  }
+
+  .activity-time {
+    font-size: 13px;
+    color: #198754;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .activity-name {
+    font-size: 1.2rem;
+    font-weight: 750;
+    color: #183c2c;
+    margin-bottom: 6px;
+  }
+
+  .activity-desc {
+    color: #55685f;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+
+  .activity-details-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .detail-tag {
+    background: #f1f7f4;
+    border: 1px solid #daece1;
+    color: #385a49;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .activity-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .activity-actions a {
+    font-size: 0.82rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.2s ease;
+  }
+
+  .btn-details {
+    background: #e8f6ef;
+    color: #198754;
+  }
+  .btn-details:hover {
+    background: #d5f0e2;
+  }
+
+  .btn-add-planner {
+    background: #198754;
+    color: white;
+  }
+  .btn-add-planner:hover {
+    background: #11643e;
+  }
+
+  /* BUDGET CARD */
+  .budget-card {
+    background: white;
+    padding: 30px;
+    border-radius: 22px;
+    margin-top: 35px;
+    box-shadow: 0 10px 30px rgba(18, 60, 43, 0.08);
+    border: 2px solid #e0eee7;
+  }
+
+  .budget-card h2 {
+    color: #123c2b;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf4f0;
+    font-size: 1rem;
+    color: #55685f;
+  }
+
+  .cost-row.total {
+    font-size: 1.25rem;
+    font-weight: 850;
+    color: #198754;
+    border-top: 2px solid #198754;
+    border-bottom: none;
+    margin-top: 10px;
+    padding-top: 16px;
+  }
+
+  .budget-comparison-box {
+    background: #fbfdfc;
+    border: 1px solid #daece1;
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 20px;
+  }
+
+  /* ACTION ROW */
+  .trip-action-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 40px 0 20px;
+  }
+
+  .btn-action {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 750;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-back {
+    background: #eef6f2;
+    color: #198754;
+    border: 1px solid #c8e8d6;
+  }
+  .btn-back:hover {
+    background: #e2f2e9;
+    color: #126b47;
+  }
+
+  .btn-edit {
+    background: #ffc107;
+    color: #3b2a00;
+  }
+  .btn-edit:hover {
+    background: #e0a800;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
+  .btn-delete:hover {
+    background: #bb2d3b;
+  }
+
+  .btn-save-ai {
+    background: #198754;
+    color: white;
+    font-size: 1.05rem;
+    padding: 14px 32px;
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.25);
+  }
+  .btn-save-ai:hover {
+    background: #11643e;
+  }
+</style>
+
+<div class="trip-container">
+
+  <!-- ========================================== -->
+  <!-- 1. HERO HEADER                             -->
+  <!-- ========================================== -->
+  <% 
+    const isManual = itinerary.tripType === 'manual' || (itinerary.tripName && !itinerary.tripType);
+    const tripTitle = itinerary.tripName || itinerary.title || "Maharashtra Trip Plan";
+    const startingCity = itinerary.startingCity || "";
+    const startDate = itinerary.startDate || "";
+    const travelers = itinerary.travelers || 1;
+    const budgetVal = itinerary.budget || 0;
+  %>
+
+  <div class="trip-hero">
+    <h1>
+      <%= isManual ? '🧭' : '🌿' %> <%= tripTitle %>
+    </h1>
+
+    <div class="trip-hero-summary">
+      <%= itinerary.summary || "Your customized Maharashtra itinerary details." %>
+    </div>
+
+    <div class="meta-pills">
+      <% if (startingCity) { %>
+        <span class="meta-pill">
+          <i class="fa-solid fa-location-dot me-1"></i> Starting from: <%= startingCity %>
+        </span>
+      <% } %>
+
+      <% if (startDate) { %>
+        <span class="meta-pill">
+          <i class="fa-solid fa-calendar-day me-1"></i> Start Date: <%= startDate %>
+        </span>
+      <% } %>
+
+      <span class="meta-pill">
+        <i class="fa-solid fa-user-group me-1"></i> <%= travelers %> <%= travelers === 1 ? 'Traveler' : 'Travelers' %>
+      </span>
+
+      <span class="meta-pill">
+        <i class="fa-regular fa-calendar-check me-1"></i> <%= itinerary.days ? itinerary.days.length : 0 %> Days
+      </span>
+
+      <% if (budgetVal > 0) { %>
+        <span class="meta-pill">
+          <i class="fa-solid fa-wallet me-1"></i> Planned Budget: ₹<%= budgetVal.toLocaleString('en-IN') %>
+        </span>
+      <% } %>
+
+      <span class="meta-pill">
+        <i class="fa-solid <%= isManual ? 'fa-pen-nib' : 'fa-wand-magic-sparkles' %> me-1"></i>
+        <%= isManual ? 'Manual Trip Plan' : 'AI Generated Plan' %>
+      </span>
+
+      <% if (typeof isSaved !== 'undefined' && isSaved) { %>
+        <span class="meta-pill bg-light text-success fw-bold">
+          <i class="fa-solid fa-check me-1"></i> Saved in My Trips
+        </span>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. OPTIONAL PERSONAL NOTES                 -->
+  <!-- ========================================== -->
+  <% if (itinerary.notes) { %>
+    <div class="notes-card">
+      <div class="notes-title">
+        <i class="fa-solid fa-note-sticky"></i> Personal Trip Notes
+      </div>
+      <p class="mb-0 text-dark" style="white-space: pre-wrap;"><%= itinerary.notes %></p>
+    </div>
+  <% } %>
+
+  <!-- ========================================== -->
+  <!-- 3. DAY-BY-DAY ITINERARY CARDS              -->
+  <!-- ========================================== -->
+  <% if (itinerary.days && itinerary.days.length > 0) { %>
+    <% itinerary.days.forEach(day => { %>
+      <div class="day-card">
+        <div class="day-card-header">
+          <h2 class="day-card-title">
+            <span class="badge-num">Day <%= day.day %></span>
+            <span><%= day.title || ("Day " + day.day + " Itinerary") %></span>
+          </h2>
+          <% if (day.date) { %>
+            <span class="day-date-badge">
+              <i class="fa-regular fa-clock me-1"></i> <%= day.date %>
+            </span>
+          <% } %>
+        </div>
+
+        <% if (day.activities && day.activities.length > 0) { %>
+          <div class="activities-container">
+            <% day.activities.forEach(activity => { 
+                const arrival = activity.arrivalTime || activity.time || "";
+                const departure = activity.departureTime || "";
+                const duration = activity.duration || "";
+                const mode = activity.transportMode || "";
+                const tCost = activity.transportCost || 0;
+                const eCost = activity.entryFee || 0;
+                const fCost = activity.foodCost || 0;
+                const desc = activity.description || activity.notes || "";
+            %>
+
+              <div class="activity-item">
+
+                <!-- TIMING -->
+                <div class="activity-time">
+                  <i class="fa-regular fa-clock"></i>
+                  <% if (arrival && departure) { %>
+                    <%= arrival %> – <%= departure %>
+                  <% } else if (arrival) { %>
+                    <%= arrival %>
+                  <% } else if (activity.time) { %>
+                    <%= activity.time %>
+                  <% } else { %>
+                    Visit Schedule
+                  <% } %>
+                </div>
+
+                <!-- ACTIVITY OR PLACE TITLE -->
+                <div class="activity-name">
+                  <% if (activity.type === "travel") { %>
+                    🚗 Travel: <%= activity.from %> → <%= activity.to %>
+                  <% } else if (activity.type === "lunch" || activity.type === "food") { %>
+                    🍽️ Dining: <%= activity.place %>
+                  <% } else { %>
+                    📍 <%= activity.place %>
+                  <% } %>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <% if (desc) { %>
+                  <div class="activity-desc">
+                    <%= desc %>
+                  </div>
+                <% } %>
+
+                <!-- DETAILS STRIP: DURATION, TRANSPORT, COSTS -->
+                <div class="activity-details-strip">
+                  <% if (duration) { %>
+                    <span class="detail-tag">
+                      <i class="fa-regular fa-hourglass-half text-primary"></i> Duration: <%= duration %>
+                    </span>
+                  <% } %>
+
+                  <% if (mode) { %>
+                    <span class="detail-tag">
+                      <i class="fa-solid fa-car text-success"></i> Transit: <%= mode %>
+                    </span>
+                  <% } %>
+
+                  <% if (tCost > 0) { %>
+                    <span class="detail-tag">
+                      <i class="fa-solid fa-gas-pump text-secondary"></i> Transport: ₹<%= tCost.toLocaleString('en-IN') %>
+                    </span>
+                  <% } %>
+
+                  <% if (eCost > 0) { %>
+                    <span class="detail-tag">
+                      <i class="fa-solid fa-ticket text-info"></i> Entry: ₹<%= eCost.toLocaleString('en-IN') %>
+                    </span>
+                  <% } %>
+
+                  <% if (fCost > 0) { %>
+                    <span class="detail-tag">
+                      <i class="fa-solid fa-utensils text-warning"></i> Food: ₹<%= fCost.toLocaleString('en-IN') %>
+                    </span>
+                  <% } %>
+                </div>
+
+                <!-- ACTIONS -->
+                <% if (activity.placeId) { %>
+                  <div class="activity-actions">
+                    <a href="/touristplaces/<%= activity.placeId %>" class="btn-details">
+                      <i class="fa-solid fa-circle-info me-1"></i> Destination Details
+                    </a>
+
+                    <form action="/m-planner/<%= activity.placeId %>" method="POST" class="d-inline m-0">
+                      <button type="submit" class="btn btn-sm btn-outline-success rounded-pill fw-semibold" style="font-size: 0.8rem;">
+                        <i class="fa-solid fa-plus me-1"></i> Add to Planner
+                      </button>
+                    </form>
+                  </div>
+                <% } %>
+
+              </div>
+
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted mb-0">No stops or activities scheduled for this day.</p>
+        <% } %>
+
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="day-card text-center py-5">
+      <p class="text-muted fs-5 mb-0">No itinerary activities found for this trip.</p>
+    </div>
+  <% } %>
+
+  <!-- ========================================== -->
+  <!-- 4. BUDGET BREAKDOWN SUMMARY                -->
+  <!-- ========================================== -->
+  <% 
+    let travelCostDisplay = "0";
+    let foodCostDisplay = "0";
+    let entryCostDisplay = "0";
+    let otherCostDisplay = "0";
+    let totalCostDisplay = "0";
+    let numericTotal = 0;
+
+    if (itinerary.estimatedCost) {
+      const c = itinerary.estimatedCost;
+
+      // Handle numbers or strings
+      if (typeof c.travel === 'number') {
+        travelCostDisplay = "₹" + c.travel.toLocaleString('en-IN');
+      } else {
+        travelCostDisplay = c.travel || "0";
+      }
+
+      if (typeof c.food === 'number') {
+        foodCostDisplay = "₹" + c.food.toLocaleString('en-IN');
+      } else {
+        foodCostDisplay = c.food || "0";
+      }
+
+      if (typeof c.entryFees === 'number') {
+        entryCostDisplay = "₹" + c.entryFees.toLocaleString('en-IN');
+      } else {
+        entryCostDisplay = c.entryFees || "0";
+      }
+
+      if (typeof c.other === 'number') {
+        otherCostDisplay = "₹" + c.other.toLocaleString('en-IN');
+      } else {
+        otherCostDisplay = c.other || "0";
+      }
+
+      if (typeof c.total === 'number') {
+        numericTotal = c.total;
+        totalCostDisplay = "₹" + c.total.toLocaleString('en-IN');
+      } else if (c.total) {
+        totalCostDisplay = c.total;
+        numericTotal = parseFloat(String(c.total).replace(/[^0-9.]/g, '')) || 0;
+      }
+    }
+  %>
+
+  <div class="budget-card">
+    <h2>
+      <i class="fa-solid fa-coins text-warning"></i>
+      Estimated Trip Expenses
+    </h2>
+
+    <div class="cost-row">
+      <span><i class="fa-solid fa-car me-2 text-primary"></i> Travel / Transport</span>
+      <strong><%= travelCostDisplay %></strong>
+    </div>
+
+    <div class="cost-row">
+      <span><i class="fa-solid fa-utensils me-2 text-warning"></i> Food & Snacks</span>
+      <strong><%= foodCostDisplay %></strong>
+    </div>
+
+    <div class="cost-row">
+      <span><i class="fa-solid fa-ticket me-2 text-info"></i> Entry Fees & Activities</span>
+      <strong><%= entryCostDisplay %></strong>
+    </div>
+
+    <% if (otherCostDisplay !== "0" && otherCostDisplay !== "₹0") { %>
+      <div class="cost-row">
+        <span><i class="fa-solid fa-receipt me-2 text-secondary"></i> Other Expenses</span>
+        <strong><%= otherCostDisplay %></strong>
+      </div>
+    <% } %>
+
+    <div class="cost-row total">
+      <span>Total Estimated Expenses</span>
+      <span><%= totalCostDisplay %></span>
+    </div>
+
+    <% if (budgetVal > 0) { 
+        const balance = budgetVal - numericTotal;
+    %>
+      <div class="budget-comparison-box mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <span class="text-muted small text-uppercase fw-bold">Planned Budget:</span>
+          <strong class="ms-1">₹<%= budgetVal.toLocaleString('en-IN') %></strong>
+        </div>
+        <div>
+          <span class="text-muted small text-uppercase fw-bold">Budget Status:</span>
+          <% if (balance >= 0) { %>
+            <span class="badge bg-success ms-1">
+              ✓ ₹<%= balance.toLocaleString('en-IN') %> Remaining
+            </span>
+          <% } else { %>
+            <span class="badge bg-danger ms-1">
+              ⚠️ ₹<%= Math.abs(balance).toLocaleString('en-IN') %> Over Budget
+            </span>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. ACTION BUTTONS (SAVED vs UNSAVED)       -->
+  <!-- ========================================== -->
+  <div class="trip-action-bar">
+    <% if (typeof isSaved !== 'undefined' && isSaved) { %>
+
+      <!-- Back to My Trips -->
+      <a href="/my-trips" class="btn-action btn-back">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to My Trips
+      </a>
+
+      <!-- Edit Trip (Available for manual trips) -->
+      <% if (isManual && itinerary._id) { %>
+        <a href="/my-trips/<%= itinerary._id %>/edit" class="btn-action btn-edit">
+          <i class="fa-solid fa-pen-to-square"></i>
+          Edit Itinerary
+        </a>
+      <% } %>
+
+      <!-- Delete Trip -->
+      <% if (itinerary._id) { %>
+        <form
+          action="/my-trips/<%= itinerary._id %>?_method=DELETE"
+          method="POST"
+          style="display:inline; margin:0;"
+          onsubmit="return confirm('Are you sure you want to delete this trip permanently?');"
+        >
+          <button type="submit" class="btn-action btn-delete">
+            <i class="fa-solid fa-trash-can"></i>
+            Delete Trip
+          </button>
+        </form>
+      <% } %>
+
+    <% } else { %>
+
+      <!-- Unsaved AI trip: Save button -->
+      <form action="/save-trip" method="POST" style="margin:0;">
+        <textarea
+          name="itinerary"
+          style="display:none;"
+        ><%= JSON.stringify(itinerary) %></textarea>
+
+        <button type="submit" class="btn-action btn-save-ai">
+          <i class="fa-solid fa-heart me-1"></i> Save Complete Trip to My Trips
+        </button>
+      </form>
+
+      <a href="/planner" class="btn-action btn-back">
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+        Plan Another Trip
+      </a>
+
+    <% } %>
+  </div>
+
+</div>

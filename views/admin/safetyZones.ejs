@@ -1,0 +1,389 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .admin-safety-page {
+    max-width: 1240px;
+    margin: 25px auto 80px;
+    padding: 0 15px;
+  }
+
+  .admin-header-box {
+    background: linear-gradient(135deg, #0e3d2f 0%, #198754 60%, #0d6efd 100%);
+    color: white;
+    padding: 2.25rem 2rem;
+    border-radius: 22px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 30px rgba(14, 61, 47, 0.22);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .table-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e0eee7;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .status-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .status-badge-verified {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .status-badge-rejected {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .zone-type-restricted {
+    background: #ffe5e5;
+    color: #dc3545;
+    border: 1px solid #ffcccc;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .zone-type-caution {
+    background: #fff3cd;
+    color: #fd7e14;
+    border: 1px solid #ffe8a1;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .zone-type-safe {
+    background: #e8f6ef;
+    color: #198754;
+    border: 1px solid #c2ebda;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+</style>
+
+<div class="admin-safety-page">
+
+  <!-- HEADER BOX -->
+  <div class="admin-header-box d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-shield-halved me-1"></i> Admin Geo-Fence Governance
+      </div>
+      <h2 class="fw-bold mb-1">Restricted Area & Safety Zone Management</h2>
+      <p class="mb-0 opacity-90 small">
+        Govern verified forest reserves, wildlife corridors, hazard passes, and safe zones across Maharashtra.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/admin/safety-zones/new" class="btn btn-warning text-dark fw-bold rounded-pill px-3 py-2 shadow-sm">
+        <i class="fa-solid fa-plus me-1"></i> Add Safety Zone
+      </a>
+      <a href="/admin/incidents" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i> Incidents
+      </a>
+      <a href="/safety" class="btn btn-light text-success rounded-pill px-3 py-2 fw-bold shadow-sm" target="_blank">
+        <i class="fa-solid fa-satellite-dish me-1"></i> Public Safety View
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS TILES -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Total Zones</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= stats.total || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-primary fs-4">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Pending Review</span>
+            <h3 class="fw-bold text-warning mt-1 mb-0"><%= stats.pending || 0 %></h3>
+          </div>
+          <div class="p-3 bg-warning-subtle rounded-circle text-warning fs-4">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Verified Active</span>
+            <h3 class="fw-bold text-success mt-1 mb-0"><%= stats.verified || 0 %></h3>
+          </div>
+          <div class="p-3 bg-success-subtle rounded-circle text-success fs-4">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Restricted Areas</span>
+            <h3 class="fw-bold text-danger mt-1 mb-0"><%= stats.restricted || 0 %></h3>
+          </div>
+          <div class="p-3 bg-danger-subtle rounded-circle text-danger fs-4">
+            <i class="fa-solid fa-ban"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE CONTAINER -->
+  <div class="table-card">
+
+    <!-- Filters Bar -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-3 border-bottom">
+      <h5 class="fw-bold text-dark mb-0">
+        <i class="fa-solid fa-list-check text-success me-2"></i> Configured Safety Zones
+      </h5>
+
+      <!-- Filter Controls -->
+      <form class="d-flex gap-2 flex-wrap" method="GET" action="/admin/safety-zones">
+        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+          <option value="all" <%= currentStatus === 'all' ? 'selected' : '' %>>All Statuses</option>
+          <option value="pending" <%= currentStatus === 'pending' ? 'selected' : '' %>>Pending Verification</option>
+          <option value="verified" <%= currentStatus === 'verified' ? 'selected' : '' %>>Verified Only</option>
+          <option value="rejected" <%= currentStatus === 'rejected' ? 'selected' : '' %>>Rejected</option>
+        </select>
+
+        <select name="zoneType" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+          <option value="all" <%= currentType === 'all' ? 'selected' : '' %>>All Zone Types</option>
+          <option value="restricted_area" <%= currentType === 'restricted_area' ? 'selected' : '' %>>Restricted Area</option>
+          <option value="caution_zone" <%= currentType === 'caution_zone' ? 'selected' : '' %>>Caution Zone</option>
+          <option value="safe_zone" <%= currentType === 'safe_zone' ? 'selected' : '' %>>Safe Zone</option>
+        </select>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr class="small text-uppercase text-secondary">
+            <th>Zone Name & District</th>
+            <th>Type</th>
+            <th>Coordinates & Radius</th>
+            <th>Official Source & Reference</th>
+            <th>Status / State</th>
+            <th>Audit (Created / Verified)</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!zones || zones.length === 0) { %>
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-circle-info fs-3 d-block mb-2"></i>
+                No safety zones found matching your filter criteria.
+              </td>
+            </tr>
+          <% } else { %>
+            <% zones.forEach(zone => { %>
+              <tr>
+                <td>
+                  <strong class="text-dark d-block"><%= zone.name %></strong>
+                  <span class="text-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i><%= zone.district %></span>
+                  <% if (zone.restrictedReason) { %>
+                    <div class="small text-danger mt-1" style="max-width: 280px; font-size: 0.78rem;">
+                      <i class="fa-solid fa-triangle-exclamation me-1"></i><%= zone.restrictedReason %>
+                    </div>
+                  <% } %>
+                </td>
+
+                <td>
+                  <% if (zone.zoneType === 'restricted_area') { %>
+                    <span class="zone-type-restricted"><i class="fa-solid fa-ban me-1"></i>Restricted</span>
+                  <% } else if (zone.zoneType === 'caution_zone') { %>
+                    <span class="zone-type-caution"><i class="fa-solid fa-triangle-exclamation me-1"></i>Caution</span>
+                  <% } else { %>
+                    <span class="zone-type-safe"><i class="fa-solid fa-shield-halved me-1"></i>Safe</span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <div class="small font-monospace text-dark">
+                    <%= zone.latitude.toFixed(4) %>, <%= zone.longitude.toFixed(4) %>
+                  </div>
+                  <span class="badge bg-secondary-subtle text-secondary small">Radius: <%= zone.radius %>m</span>
+                </td>
+
+                <td>
+                  <div class="small fw-semibold text-dark text-truncate" style="max-width: 220px;" title="<%= zone.sourceName %>">
+                    <%= zone.sourceName %>
+                  </div>
+                  <% if (zone.notificationNumber) { %>
+                    <div class="small text-muted font-monospace" style="font-size: 0.75rem;" title="<%= zone.notificationNumber %>">
+                      Ref: <%= zone.notificationNumber %>
+                    </div>
+                  <% } %>
+                  <% if (zone.sourceUrl) { %>
+                    <a href="<%= zone.sourceUrl %>" target="_blank" rel="noopener noreferrer" class="small text-decoration-none">
+                      <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View Official Source
+                    </a>
+                  <% } %>
+                </td>
+
+                <td>
+                  <div class="mb-1">
+                    <% if (zone.verificationStatus === 'verified') { %>
+                      <span class="status-badge-verified"><i class="fa-solid fa-check me-1"></i>Verified</span>
+                    <% } else if (zone.verificationStatus === 'pending') { %>
+                      <span class="status-badge-pending"><i class="fa-solid fa-hourglass-half me-1"></i>Pending Review</span>
+                    <% } else { %>
+                      <span class="status-badge-rejected"><i class="fa-solid fa-xmark me-1"></i>Rejected</span>
+                    <% } %>
+                  </div>
+
+                  <div>
+                    <% if (zone.isActive) { %>
+                      <span class="badge bg-success-subtle text-success small">Active</span>
+                    <% } else { %>
+                      <span class="badge bg-danger-subtle text-danger small">Deactivated</span>
+                    <% } %>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="small text-muted">
+                    <div>Created by: <span class="text-dark fw-semibold"><%= zone.createdBy ? (zone.createdBy.username || zone.createdBy.email) : 'System / Official' %></span></div>
+                    <% if (zone.verifiedBy) { %>
+                      <div>Verified by: <span class="text-success fw-semibold"><%= zone.verifiedBy.username || zone.verifiedBy.email %></span></div>
+                      <div style="font-size: 0.72rem;"><%= zone.verifiedAt ? new Date(zone.verifiedAt).toLocaleDateString() : '' %></div>
+                    <% } else { %>
+                      <div class="text-warning" style="font-size: 0.75rem;">Not yet verified</div>
+                    <% } %>
+                  </div>
+                </td>
+
+                <td class="text-end">
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-light border rounded-pill px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                      
+                      <!-- Verification Options -->
+                      <% if (zone.verificationStatus !== 'verified') { %>
+                        <li>
+                          <form action="/admin/safety-zones/<%= zone._id %>/verify" method="POST" class="m-0">
+                            <input type="hidden" name="decision" value="verified">
+                            <button type="submit" class="dropdown-item text-success fw-bold">
+                              <i class="fa-solid fa-circle-check me-2"></i>Verify Zone
+                            </button>
+                          </form>
+                        </li>
+                      <% } %>
+
+                      <% if (zone.verificationStatus !== 'rejected') { %>
+                        <li>
+                          <form action="/admin/safety-zones/<%= zone._id %>/verify" method="POST" class="m-0">
+                            <input type="hidden" name="decision" value="rejected">
+                            <button type="submit" class="dropdown-item text-danger">
+                              <i class="fa-solid fa-ban me-2"></i>Reject Zone
+                            </button>
+                          </form>
+                        </li>
+                      <% } %>
+
+                      <li><hr class="dropdown-divider"></li>
+
+                      <!-- Toggle Active -->
+                      <li>
+                        <form action="/admin/safety-zones/<%= zone._id %>/toggle-active" method="POST" class="m-0">
+                          <button type="submit" class="dropdown-item text-secondary">
+                            <i class="fa-solid <%= zone.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-2"></i>
+                            <%= zone.isActive ? 'Deactivate Zone' : 'Activate Zone' %>
+                          </button>
+                        </form>
+                      </li>
+
+                      <!-- Edit -->
+                      <li>
+                        <a href="/admin/safety-zones/<%= zone._id %>/edit" class="dropdown-item text-dark">
+                          <i class="fa-solid fa-pen-to-square me-2"></i>Edit Details
+                        </a>
+                      </li>
+
+                      <li><hr class="dropdown-divider"></li>
+
+                      <!-- Delete -->
+                      <li>
+                        <form action="/admin/safety-zones/<%= zone._id %>/delete" method="POST" class="m-0" onsubmit="return confirm('Are you sure you want to permanently delete this zone?');">
+                          <button type="submit" class="dropdown-item text-danger">
+                            <i class="fa-solid fa-trash me-2"></i>Delete Zone
+                          </button>
+                        </form>
+                      </li>
+
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

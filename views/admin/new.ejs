@@ -1,0 +1,420 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .new-place-container {
+    max-width: 900px;
+    margin: 30px auto 80px;
+    padding: 0 15px;
+  }
+
+  .form-card {
+    background: #ffffff;
+    border-radius: 22px;
+    border: 1px solid #e0eee7;
+    padding: 2.25rem;
+    box-shadow: 0 10px 30px rgba(18, 60, 43, 0.08);
+  }
+
+  .form-header-box {
+    background: linear-gradient(135deg, #183c2c 0%, #198754 100%);
+    color: white;
+    padding: 1.75rem 2rem;
+    border-radius: 18px;
+    margin-bottom: 2rem;
+  }
+</style>
+
+<div class="new-place-container">
+
+  <!-- HEADER -->
+  <div class="form-header-box d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-map-location-dot me-1"></i> New Destination
+      </div>
+      <h3 class="fw-bold mb-1">Add New Tourist Destination</h3>
+      <p class="mb-0 opacity-90 small">
+        Publish a new tourism spot, heritage site, or attraction to the Maharashtra directory.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="/places" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-list me-1"></i> Manage Places
+      </a>
+      <a href="/dashboard" class="btn btn-warning text-dark rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-gauge me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <form method="POST" action="/places" novalidate class="needs-validation">
+
+      <!-- SECTION 1: BASIC INFO -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-circle-info text-success me-2"></i> Basic Information
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <!-- NAME -->
+        <div class="col-md-7">
+          <label for="name" class="form-label fw-bold small">Destination Name <span class="text-danger">*</span></label>
+          <input
+            name="touristPlace[name]"
+            id="name"
+            class="form-control"
+            type="text"
+            placeholder="e.g. Ajanta Caves"
+            required
+          >
+          <div class="invalid-feedback">Please enter destination name.</div>
+        </div>
+
+        <!-- DISTRICT -->
+        <div class="col-md-5">
+          <label for="district" class="form-label fw-bold small">District <span class="text-danger">*</span></label>
+          <input
+            name="touristPlace[district]"
+            id="district"
+            class="form-control"
+            type="text"
+            placeholder="e.g. Chhatrapati Sambhajinagar"
+            required
+          >
+          <div class="invalid-feedback">Please enter district name.</div>
+        </div>
+
+        <!-- CATEGORY -->
+        <div class="col-md-6">
+          <label for="category" class="form-label fw-bold small">Category <span class="text-danger">*</span></label>
+          <select
+            name="touristPlace[category]"
+            id="category"
+            class="form-select"
+            required
+          >
+            <option value="">Choose Category</option>
+            <option value="Historical">Historical</option>
+            <option value="Religious">Religious</option>
+            <option value="Nature">Nature</option>
+            <option value="Wildlife">Wildlife</option>
+            <option value="Park / Garden">Park / Garden</option>
+            <option value="Museum">Museum</option>
+            <option value="Beach">Beach</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Family">Family</option>
+            <option value="Park / Family">Park / Family</option>
+            <option value="Leisure">Leisure</option>
+            <option value="Trekking">Trekking</option>
+            <option value="Wellness">Wellness</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Hill Station">Hill Station</option>
+          </select>
+          <div class="invalid-feedback">Please choose a category.</div>
+        </div>
+
+        <!-- RATING -->
+        <div class="col-md-6">
+          <label for="rating" class="form-label fw-bold small">Rating (0 - 5)</label>
+          <input
+            name="touristPlace[rating]"
+            id="rating"
+            type="number"
+            step="0.1"
+            min="0"
+            max="5"
+            class="form-control"
+            placeholder="e.g. 4.5"
+          >
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="col-12">
+          <label for="description" class="form-label fw-bold small">Description <span class="text-danger">*</span></label>
+          <textarea
+            name="touristPlace[description]"
+            id="description"
+            class="form-control"
+            rows="4"
+            placeholder="Enter destination details, significance, and history..."
+            required
+          ></textarea>
+          <div class="invalid-feedback">Please enter destination description.</div>
+        </div>
+
+        <!-- IMAGE URL -->
+        <div class="col-12">
+          <label for="images" class="form-label fw-bold small">Destination Image URL</label>
+          <input
+            name="touristPlace[images]"
+            id="images"
+            type="text"
+            class="form-control"
+            placeholder="https://images.unsplash.com/... (Image URL or comma-separated URLs)"
+          >
+          <div class="form-text small">Enter image web URL(s). Separate multiple URLs with commas.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: LOCATION -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-location-dot text-success me-2"></i> Location & Coordinates
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <!-- ADDRESS -->
+        <div class="col-12">
+          <label for="address" class="form-label fw-bold small">Address / Landmark <span class="text-danger">*</span></label>
+          <input
+            name="touristPlace[location][address]"
+            id="address"
+            type="text"
+            class="form-control"
+            placeholder="e.g. Ajanta, Chhatrapati Sambhajinagar, Maharashtra"
+            required
+          >
+          <div class="invalid-feedback">Please enter address.</div>
+        </div>
+
+        <!-- LATITUDE -->
+        <div class="col-md-6">
+          <label for="latitude" class="form-label fw-bold small">Latitude (°N) <span class="text-danger">*</span></label>
+          <input
+            name="touristPlace[location][latitude]"
+            id="latitude"
+            type="number"
+            step="any"
+            class="form-control font-monospace"
+            placeholder="e.g. 20.553111"
+            required
+          >
+          <div class="invalid-feedback">Please enter valid latitude.</div>
+        </div>
+
+        <!-- LONGITUDE -->
+        <div class="col-md-6">
+          <label for="longitude" class="form-label fw-bold small">Longitude (°E) <span class="text-danger">*</span></label>
+          <input
+            name="touristPlace[location][longitude]"
+            id="longitude"
+            type="number"
+            step="any"
+            class="form-control font-monospace"
+            placeholder="e.g. 75.700250"
+            required
+          >
+          <div class="invalid-feedback">Please enter valid longitude.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: VISITING INFO & FEES -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-clock text-success me-2"></i> Visiting Timings & Entry Fee
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label for="bestTime" class="form-label fw-bold small">Best Time to Visit</label>
+          <input
+            name="touristPlace[bestTime]"
+            id="bestTime"
+            type="text"
+            class="form-control"
+            placeholder="e.g. October to March"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="openingTime" class="form-label fw-bold small">Opening Time</label>
+          <input
+            name="touristPlace[openingTime]"
+            id="openingTime"
+            type="text"
+            class="form-control"
+            placeholder="e.g. 09:00 AM"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="closingTime" class="form-label fw-bold small">Closing Time</label>
+          <input
+            name="touristPlace[closingTime]"
+            id="closingTime"
+            type="text"
+            class="form-control"
+            placeholder="e.g. 06:00 PM"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="indianFee" class="form-label fw-bold small">Indian Tourist Fee (₹)</label>
+          <input
+            name="touristPlace[entryFee][indian]"
+            id="indianFee"
+            type="number"
+            min="0"
+            class="form-control"
+            placeholder="₹"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="foreignFee" class="form-label fw-bold small">Foreign Tourist Fee (₹)</label>
+          <input
+            name="touristPlace[entryFee][foreign]"
+            id="foreignFee"
+            type="number"
+            min="0"
+            class="form-control"
+            placeholder="₹"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="currency" class="form-label fw-bold small">Currency</label>
+          <input
+            name="touristPlace[entryFee][currency]"
+            id="currency"
+            type="text"
+            class="form-control"
+            value="INR"
+          >
+        </div>
+
+        <div class="col-12">
+          <label for="feeNotes" class="form-label fw-bold small">Entry Fee Notes</label>
+          <input
+            name="touristPlace[entryFee][notes]"
+            id="feeNotes"
+            type="text"
+            class="form-control"
+            placeholder="e.g. Free entry for children under 5; camera charges extra"
+          >
+        </div>
+
+        <div class="col-md-6">
+          <label for="activities" class="form-label fw-bold small">Activities</label>
+          <input
+            name="touristPlace[activities]"
+            id="activities"
+            type="text"
+            class="form-control"
+            placeholder="e.g. Trekking, Photography, Cave Exploration"
+          >
+          <div class="form-text small">Separate multiple activities with commas.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="nearbyPlaces" class="form-label fw-bold small">Nearby Attractions</label>
+          <input
+            name="touristPlace[nearbyPlaces]"
+            id="nearbyPlaces"
+            type="text"
+            class="form-control"
+            placeholder="e.g. Ellora Caves, Grishneshwar Temple"
+          >
+          <div class="form-text small">Separate multiple places with commas.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: GEOFENCE & SAFETY -->
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="fa-solid fa-shield-halved text-success me-2"></i> Geo-Fence & Safety Monitoring
+      </h5>
+
+      <div class="form-check form-switch mb-3">
+        <input
+          name="touristPlace[geoFence][enabled]"
+          id="geoFenceEnabled"
+          type="checkbox"
+          value="true"
+          class="form-check-input"
+        >
+        <label for="geoFenceEnabled" class="form-check-label fw-bold">
+          Enable Geo-Fencing & Safety Monitoring
+        </label>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label for="radius" class="form-label fw-bold small">Geo-Fence Radius (meters)</label>
+          <input
+            name="touristPlace[geoFence][radius]"
+            id="radius"
+            type="number"
+            min="0"
+            class="form-control"
+            placeholder="e.g. 800"
+          >
+        </div>
+
+        <div class="col-md-4">
+          <label for="zoneType" class="form-label fw-bold small">Zone Type</label>
+          <select
+            name="touristPlace[geoFence][zoneType]"
+            id="zoneType"
+            class="form-select"
+          >
+            <option value="tourist_area">Tourist Area</option>
+            <option value="restricted_area">Restricted Area</option>
+            <option value="unsafe_area">Unsafe Area</option>
+            <option value="forest_area">Forest Area</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label for="status" class="form-label fw-bold small">Verification Status</label>
+          <select
+            name="touristPlace[geoFence][status]"
+            id="status"
+            class="form-select"
+          >
+            <option value="unverified">Unverified</option>
+            <option value="verified">Verified</option>
+            <option value="restricted">Restricted</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label for="restrictedReason" class="form-label fw-bold small">Restricted Reason (if applicable)</label>
+          <textarea
+            name="touristPlace[geoFence][restrictedReason]"
+            id="restrictedReason"
+            class="form-control"
+            rows="2"
+            placeholder="Enter reason if destination or surrounding zone has active restrictions..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- SUBMIT BUTTONS -->
+      <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+        <a href="/places" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+        <button type="submit" class="btn btn-success fw-bold rounded-pill px-5 shadow-sm">
+          <i class="fa-solid fa-plus me-1"></i> Add Destination
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- BOOTSTRAP VALIDATION SCRIPT -->
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>

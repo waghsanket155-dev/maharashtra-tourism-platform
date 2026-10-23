@@ -1,0 +1,57 @@
+body{
+     font-family: "Plus Jakarta Sans", sans-serif !important; 
+     display: flex;
+     flex-direction: column;
+     min-height: 100vh;
+     /* background-image:url("/image/bacgoundimg.jpg");
+     background-size: cover;
+    background-position: center;
+     background-attachment: fixed; */
+}
+.container{
+    flex: 1;
+}
+h1{
+    margin-left: 1rem;
+}
+.navbar{
+    background-color:white;
+    height: 4rem;
+}
+.fa-compass{
+    color: #fe424d;
+    font-size: 2rem;
+}
+.nav-link{
+    color: #222222 !important;
+}
+
+/* footer */
+.f-info-link a{
+   text-decoration: none;
+   color: #222222; 
+   margin-right: 10px; 
+}
+.f-info-link a:hover{
+    text-decoration: underline;
+}
+.f-info-link{
+    width: 100%;
+}
+.f-info-socials{
+    width: 100%;
+    font-size: 1.5rem;
+}
+.f-info-socials i{
+    margin-right: 1rem;
+}
+.f-info{
+   display: flex;
+   flex-wrap: wrap;
+   background-color: #cae6da;
+   height: 6rem;
+   justify-content: center;
+   align-content: space-evenly;
+   text-align: center;
+   
+}

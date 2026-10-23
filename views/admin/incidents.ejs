@@ -1,0 +1,272 @@
+<% layout("layout/boilerplate") %>
+
+<style>
+  .admin-incidents-page {
+    max-width: 1180px;
+    margin: 30px auto 80px;
+    padding: 0 15px;
+  }
+
+  .admin-header-box {
+    background: linear-gradient(135deg, #183c2c 0%, #198754 100%);
+    color: white;
+    padding: 2.25rem 2rem;
+    border-radius: 22px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 30px rgba(24, 60, 44, 0.2);
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e0eee7;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .table-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e0eee7;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+
+  .status-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+  }
+
+  .status-badge-inprogress {
+    background: #cff4fc;
+    color: #055160;
+    border: 1px solid #b6effb;
+  }
+
+  .status-badge-resolved {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+  }
+
+  .status-badge-rejected {
+    background: #e2e3e5;
+    color: #41464b;
+    border: 1px solid #d3d6d8;
+  }
+</style>
+
+<div class="admin-incidents-page">
+
+  <!-- HEADER -->
+  <div class="admin-header-box d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="badge bg-danger text-white px-3 py-1 rounded-pill mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+        <i class="fa-solid fa-shield-halved me-1"></i> Admin Incident Center
+      </div>
+      <h2 class="fw-bold mb-1">Tourist Safety & SOS Reports - Incident Management Dashboard</h2>
+      <p class="mb-0 opacity-90 small">
+        Review emergency reports, verify location coordinates, and manage incident resolution across Maharashtra.
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="/dashboard" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+        <i class="fa-solid fa-gauge me-1"></i> Dashboard
+      </a>
+      <a href="/safety" class="btn btn-light text-success rounded-pill px-3 py-2 fw-bold shadow-sm">
+        <i class="fa-solid fa-satellite-dish me-1"></i> Live Safety View
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS OVERVIEW -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small fw-bold text-uppercase">Total Reports</span>
+            <h3 class="fw-bold text-dark mt-1 mb-0"><%= stats.total || 0 %></h3>
+          </div>
+          <div class="p-3 bg-light rounded-circle text-secondary fs-4">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card border-warning-subtle">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-warning small fw-bold text-uppercase">Pending</span>
+            <h3 class="fw-bold text-warning mt-1 mb-0"><%= stats.pending || 0 %></h3>
+          </div>
+          <div class="p-3 bg-warning-subtle rounded-circle text-warning fs-4">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card border-info-subtle">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-info small fw-bold text-uppercase">In Progress</span>
+            <h3 class="fw-bold text-info mt-1 mb-0"><%= stats.inProgress || 0 %></h3>
+          </div>
+          <div class="p-3 bg-info-subtle rounded-circle text-info fs-4">
+            <i class="fa-solid fa-spinner"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card border-success-subtle">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-success small fw-bold text-uppercase">Resolved</span>
+            <h3 class="fw-bold text-success mt-1 mb-0"><%= stats.resolved || 0 %></h3>
+          </div>
+          <div class="p-3 bg-success-subtle rounded-circle text-success fs-4">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER CONTROLS -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <form method="GET" action="/admin/incidents" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="fa-solid fa-filter text-muted"></i></span>
+          <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="all" <%= currentStatusFilter === 'all' ? 'selected' : '' %>>All Statuses</option>
+            <option value="Pending" <%= currentStatusFilter === 'Pending' ? 'selected' : '' %>>Pending Only</option>
+            <option value="In Progress" <%= currentStatusFilter === 'In Progress' ? 'selected' : '' %>>In Progress Only</option>
+            <option value="Resolved" <%= currentStatusFilter === 'Resolved' ? 'selected' : '' %>>Resolved Only</option>
+            <option value="Rejected" <%= currentStatusFilter === 'Rejected' ? 'selected' : '' %>>Rejected Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <select name="type" class="form-select" onchange="this.form.submit()">
+          <option value="all" <%= currentTypeFilter === 'all' ? 'selected' : '' %>>All Incident Categories</option>
+          <option value="medical_emergency" <%= currentTypeFilter === 'medical_emergency' ? 'selected' : '' %>>Medical Emergency</option>
+          <option value="lost_tourist" <%= currentTypeFilter === 'lost_tourist' ? 'selected' : '' %>>Lost Tourist</option>
+          <option value="harassment_safety" <%= currentTypeFilter === 'harassment_safety' ? 'selected' : '' %>>Harassment / Safety</option>
+          <option value="accident_injury" <%= currentTypeFilter === 'accident_injury' ? 'selected' : '' %>>Accident / Injury</option>
+          <option value="unsafe_restricted_area" <%= currentTypeFilter === 'unsafe_restricted_area' ? 'selected' : '' %>>Unsafe / Restricted Area</option>
+          <option value="lost_belongings" <%= currentTypeFilter === 'lost_belongings' ? 'selected' : '' %>>Lost Belongings</option>
+          <option value="other" <%= currentTypeFilter === 'other' ? 'selected' : '' %>>Other</option>
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <a href="/admin/incidents" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-rotate-left me-1"></i> Reset
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- INCIDENTS TABLE -->
+  <div class="table-card">
+    <% if (!incidents || incidents.length === 0) { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-regular fa-clipboard fs-1 mb-3 text-secondary d-block"></i>
+        <h5 class="fw-bold">No Incident Reports Found</h5>
+        <p class="small mb-0">No reports match the selected filters.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Report ID</th>
+              <th scope="col">User</th>
+              <th scope="col">Category</th>
+              <th scope="col">Submitted</th>
+              <th scope="col">GPS Location</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% incidents.forEach(inc => { 
+                let badgeClass = "status-badge-pending";
+                if (inc.status === "In Progress") badgeClass = "status-badge-inprogress";
+                else if (inc.status === "Resolved") badgeClass = "status-badge-resolved";
+                else if (inc.status === "Rejected") badgeClass = "status-badge-rejected";
+
+                const typeMap = {
+                  medical_emergency: "🩺 Medical",
+                  lost_tourist: "🧭 Lost Tourist",
+                  harassment_safety: "🛡️ Safety",
+                  accident_injury: "🩹 Accident",
+                  unsafe_restricted_area: "⚠️ Restricted Area",
+                  lost_belongings: "🧳 Lost Items",
+                  other: "📋 Other"
+                };
+                const formattedType = typeMap[inc.incidentType] || inc.incidentType;
+                const hasLocation = inc.locationConsent && inc.location && inc.location.latitude;
+            %>
+              <tr>
+                <td>
+                  <strong class="font-monospace text-dark"><%= inc.reportId %></strong>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark"><%= inc.user?.username || 'User' %></div>
+                  <small class="text-muted"><%= inc.user?.email || 'N/A' %></small>
+                </td>
+                <td>
+                  <span class="small fw-bold"><%= formattedType %></span>
+                </td>
+                <td>
+                  <small class="text-muted">
+                    <%= inc.createdAt ? new Date(inc.createdAt).toLocaleString() : 'N/A' %>
+                  </small>
+                </td>
+                <td>
+                  <% if (hasLocation) { %>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                      <i class="fa-solid fa-location-dot me-1"></i> Attached
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-secondary-subtle text-secondary border">
+                      None
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge <%= badgeClass %> px-2 py-1 rounded-pill fw-bold">
+                    <%= inc.status %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="/admin/incidents/<%= inc._id %>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                    Review <i class="fa-solid fa-chevron-right ms-1"></i>
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</div>

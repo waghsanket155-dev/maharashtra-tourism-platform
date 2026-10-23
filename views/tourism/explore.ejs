@@ -1,0 +1,401 @@
+
+<% layout("layout/boilerplate") %>
+
+<style>
+*{box-sizing:border-box}
+body{background:#f7f8f5}
+
+.explore-header{padding:2rem 1rem 1rem}
+.explore-header h1{font-size:2.2rem;font-weight:700;margin-bottom:.4rem}
+.explore-header p{color:#6b7280}
+
+.search-box{max-width:650px;margin:1.5rem auto;position:relative}
+.search-box input{
+  width:100%;padding:15px 55px 15px 20px;border-radius:50px;
+  border:1px solid #ddd;background:white;
+  box-shadow:0 5px 20px rgba(0,0,0,.06);
+  outline:none;font-size:1rem
+}
+.search-box i{position:absolute;right:22px;top:17px;color:#555}
+
+#filters{
+  display:flex;gap:1.2rem;overflow-x:auto;padding:1rem 0 1.5rem;
+  scrollbar-width:none
+}
+#filters::-webkit-scrollbar{display:none}
+
+.filter{
+  min-width:95px;text-align:center;padding:12px 10px;
+  border-radius:15px;cursor:pointer;transition:.3s;color:#555
+}
+.filter:hover{
+  background:white;transform:translateY(-5px);
+  box-shadow:0 8px 20px rgba(0,0,0,.08);color:#198754
+}
+.filter i{font-size:1.5rem;margin-bottom:7px}
+.filter p{margin:0;font-size:.85rem;font-weight:500}
+
+.tour-card{
+  border:0;border-radius:20px;overflow:hidden;background:white;
+  box-shadow:0 5px 20px rgba(0,0,0,.07);
+  transition:.35s;height:100%;
+  opacity:0;transform:translateY(30px);
+  animation:show .7s ease forwards
+}
+.tour-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 15px 35px rgba(0,0,0,.14)
+}
+@keyframes show{to{opacity:1;transform:translateY(0)}}
+
+.image-wrapper{height:230px;overflow:hidden;position:relative}
+.image-wrapper img{
+  width:100%;height:100%;object-fit:cover;transition:.5s
+}
+.tour-card:hover img{transform:scale(1.08)}
+
+.image-wrapper:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,
+  rgba(0,0,0,.25),transparent 45%,rgba(0,0,0,.35));
+  pointer-events:none
+}
+
+.category-badge{
+  position:absolute;top:14px;left:14px;z-index:2;
+  background:rgba(255,255,255,.92);
+  padding:6px 11px;border-radius:20px;
+  font-size:.75rem;font-weight:600
+}
+
+.tour-body{padding:1.1rem}
+.tour-title{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+
+.location{color:#6b7280;font-size:.85rem;margin-bottom:.7rem}
+.location i{color:#198754}
+
+.rating{float:right;font-size:.85rem;font-weight:600}
+.rating i{color:#ffc107}
+
+.description{
+  color:#6b7280;font-size:.85rem;
+  display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:.8rem
+}
+
+.tour-info{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.9rem
+}
+.info-item{
+  background:#f1f5f2;padding:5px 9px;
+  border-radius:10px;font-size:.72rem;color:#555
+}
+
+.card-buttons{display:flex;gap:8px;align-items:stretch}
+
+.card-buttons a, .card-buttons .planner-form{
+  flex:1;
+  margin:0;
+  display:flex;
+}
+
+.view-btn{
+  width:100%;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:12px;padding:9px 6px;text-decoration:none;text-align:center;
+  font-weight:600;font-size:.84rem;transition:.3s;background:#198754;color:white
+}
+.view-btn:hover{background:#146c43;color:white}
+
+.planner-form{display:flex;width:100%}
+.planner-btn{
+  width:100%;border-radius:12px;padding:9px 6px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font-weight:600;font-size:.84rem;transition:.3s;cursor:pointer;
+  background:#f1f5f2;color:#198754;border:1px solid #198754
+}
+.planner-btn:hover{background:#198754;color:white}
+
+#noResult{
+  display:none;text-align:center;padding:4rem 1rem
+}
+#noResult i{font-size:3rem;color:#aaa}
+
+@media(max-width:600px){
+  .explore-header h1{font-size:1.7rem}
+  .image-wrapper{height:220px}
+  .filter{min-width:80px}
+  .card-buttons a{font-size:.78rem}
+}
+</style>
+
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="explore-header text-center">
+    <h1>Explore Maharashtra 🌿</h1>
+    <p>Discover heritage, culture, nature and adventure.</p>
+
+    <div class="search-box">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search destinations, districts or categories..."
+      >
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+  </div>
+
+
+  <!-- FILTERS -->
+  <div id="filters">
+
+    <div class="filter" data-category="all">
+      <i class="fa-solid fa-compass"></i>
+      <p>All</p>
+    </div>
+
+    <div class="filter" data-category="Historical">
+      <i class="fa-solid fa-landmark"></i>
+      <p>Heritage</p>
+    </div>
+
+    <div class="filter" data-category="Religious">
+      <i class="fa-solid fa-place-of-worship"></i>
+      <p>Religious</p>
+    </div>
+
+    <div class="filter" data-category="Nature">
+      <i class="fa-solid fa-leaf"></i>
+      <p>Nature</p>
+    </div>
+
+    <div class="filter" data-category="Wildlife">
+      <i class="fa-solid fa-paw"></i>
+      <p>Wildlife</p>
+    </div>
+
+    <div class="filter" data-category="Park / Garden">
+      <i class="fa-solid fa-tree"></i>
+      <p>Gardens</p>
+    </div>
+
+    <div class="filter" data-category="Museum">
+      <i class="fa-solid fa-building-columns"></i>
+      <p>Museums</p>
+    </div>
+
+    <div class="filter" data-category="Beach">
+      <i class="fa-solid fa-umbrella-beach"></i>
+      <p>Beaches</p>
+    </div>
+
+    <div class="filter" data-category="Adventure">
+      <i class="fa-solid fa-person-hiking"></i>
+      <p>Adventure</p>
+    </div>
+
+  </div>
+
+
+  <!-- DESTINATION CARDS -->
+  <div
+    class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5"
+    id="tourContainer"
+  >
+
+    <% for(let place of data){ %>
+
+      <div
+        class="col tour-item"
+        data-category="<%= place.category %>"
+        data-search="<%= place.name %> <%= place.district %> <%= place.category %>"
+      >
+
+        <div class="tour-card">
+
+          <!-- IMAGE -->
+          <div class="image-wrapper">
+
+            <img
+              src="<%= place.images?.[0] || '/image/placeholder.png' %>"
+              alt="<%= place.name %>"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='/image/placeholder.png';"
+            >
+
+            <span class="category-badge">
+              <%= place.category %>
+            </span>
+
+          </div>
+
+
+          <!-- BODY -->
+          <div class="tour-body">
+
+            <div class="tour-title">
+              <%= place.name %>
+
+              <% if(place.rating){ %>
+                <span class="rating">
+                  <i class="fa-solid fa-star"></i>
+                  <%= place.rating %>
+                </span>
+              <% } %>
+            </div>
+
+
+            <div class="location">
+              <i class="fa-solid fa-location-dot"></i>
+              <%= place.district %>
+            </div>
+
+
+            <div class="description">
+              <%= place.description %>
+            </div>
+
+
+            <div class="tour-info">
+
+              <% if(place.bestTime){ %>
+                <span class="info-item">
+                  🌤️ <%= place.bestTime %>
+                </span>
+              <% } %>
+
+              <% if(
+                place.entryFee &&
+                place.entryFee.indian !== null &&
+                place.entryFee.indian !== undefined
+              ){ %>
+
+                <span class="info-item">
+                  🎟️ ₹<%= place.entryFee.indian %>
+                </span>
+
+              <% } %>
+
+
+              <% if(place.activities?.length){ %>
+
+                <span class="info-item">
+                  🎯 <%= place.activities.length %> activities
+                </span>
+
+              <% } %>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+            <div class="card-buttons">
+
+              <a
+                href="/touristplaces/<%= place._id %>"
+                class="view-btn"
+              >
+                Explore
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+
+              <form action="/m-planner/<%= place._id %>" method="POST" class="planner-form">
+                <button type="submit" class="planner-btn" title="Add to your manual planner">
+                  Add to Planner
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    <% } %>
+
+  </div>
+
+
+  <!-- NO RESULT -->
+  <div id="noResult">
+    <i class="fa-solid fa-map-location-dot"></i>
+    <h4 class="mt-3">No destination found</h4>
+    <p>Try another destination, district or category.</p>
+  </div>
+
+</div>
+
+
+<script>
+
+const searchInput = document.getElementById("searchInput");
+const tourItems = document.querySelectorAll(".tour-item");
+const noResult = document.getElementById("noResult");
+
+function filterCards(){
+
+  const search = searchInput.value.toLowerCase().trim();
+  const category =
+    document.querySelector('.filter.active')?.dataset.category || 'all';
+
+  let visible = 0;
+
+  tourItems.forEach(item => {
+    const text = item.dataset.search.toLowerCase();
+    const matchSearch = text.includes(search);
+    const matchCategory =
+      category === 'all' ||
+      item.dataset.category === category;
+
+    if(matchSearch && matchCategory){
+      item.style.display = '';
+      visible++;
+    }else{
+      item.style.display = 'none';
+    }
+  });
+
+  noResult.style.display = visible ? 'none' : 'block';
+}
+
+searchInput.addEventListener('input', filterCards);
+
+document.querySelectorAll('.filter').forEach(filter => {
+  filter.addEventListener('click', function(){
+    document
+      .querySelectorAll('.filter')
+      .forEach(f => f.classList.remove('active'));
+    this.classList.add('active');
+    filterCards();
+  });
+});
+
+// Handle URL query parameters (e.g. /explore?category=Historical or ?search=Pune)
+const urlParams = new URLSearchParams(window.location.search);
+const catParam = urlParams.get('category');
+const searchParam = urlParams.get('search');
+
+if (searchParam && searchInput) {
+  searchInput.value = searchParam;
+}
+
+if (catParam) {
+  const targetFilter = Array.from(document.querySelectorAll('.filter')).find(
+    f => f.dataset.category && f.dataset.category.toLowerCase() === catParam.toLowerCase()
+  );
+  if (targetFilter) {
+    document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+    targetFilter.classList.add('active');
+  }
+}
+
+if (searchParam || catParam) {
+  filterCards();
+}
+
+</script>
