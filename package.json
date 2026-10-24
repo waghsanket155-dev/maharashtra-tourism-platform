@@ -1,14 +1,26 @@
 {
-  "name": "maharashtra",
+  "name": "maharashtra-tourism-platform",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smart Digital Platform to Promote Eco & Cultural Tourism in Maharashtra with Itinerary Planning and Tourist Safety Geofencing",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "seed": "node init/index.js",
     "test": "node test/adminDashboard.test.js && node test/app.test.js && node test/manualPlanner.test.js && node test/safety.test.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "maharashtra-tourism",
+    "nodejs",
+    "expressjs",
+    "mongodb",
+    "mongoose",
+    "ejs",
+    "leaflet",
+    "geofencing",
+    "trip-planner",
+    "final-year-project"
+  ],
+  "author": "waghsanket155-dev",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

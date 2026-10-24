@@ -28,7 +28,7 @@ app.use(methodoverride("_method"));
 // Session configuration
 const sessionoption = {
   // store: store,
-  secret: "ndjfqejiofjew",
+  secret: process.env.SESSION_SECRET || "ndjfqejiofjew",
   resave: false,
   saveUninitialized: true,
   cookie: {
